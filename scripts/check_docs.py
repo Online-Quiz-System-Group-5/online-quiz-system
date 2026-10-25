@@ -1,7 +1,7 @@
 """Check that the Group 5 SRS document is a readable DOCX with key IDs."""
 
 from pathlib import Path
-from zipfile import ZipFile
+from zipfile import BadZipFile, ZipFile
 import xml.etree.ElementTree as ET
 
 
@@ -15,23 +15,35 @@ REQUIRED = (
 )
 
 
-if not DOC.is_file():
-    raise SystemExit(f"Missing required SRS: {DOC}")
+def validate_document(doc_path: Path = DOC) -> None:
+    """Validate a DOCX package and require the identifiers used by the SRS."""
+    if not doc_path.is_file():
+        raise ValueError(f"Missing required SRS: {doc_path}")
 
-try:
-    with ZipFile(DOC) as package:
-        corrupt_member = package.testzip()
-        if corrupt_member:
-            raise SystemExit(f"Corrupt DOCX package member: {corrupt_member}")
-        root = ET.fromstring(package.read("word/document.xml"))
-except (OSError, KeyError, ET.ParseError) as error:
-    raise SystemExit(f"Invalid SRS DOCX package: {error}") from error
+    try:
+        with ZipFile(doc_path) as package:
+            corrupt_member = package.testzip()
+            if corrupt_member:
+                raise ValueError(f"Corrupt DOCX package member: {corrupt_member}")
+            root = ET.fromstring(package.read("word/document.xml"))
+    except (OSError, KeyError, ET.ParseError, BadZipFile) as error:
+        raise ValueError(f"Invalid SRS DOCX package: {error}") from error
 
-document_text = " ".join(
-    node.text or "" for node in root.iter() if node.tag.endswith("}t")
-)
-missing = [identifier for identifier in REQUIRED if identifier not in document_text]
-if missing:
-    raise SystemExit("SRS is missing expected content: " + ", ".join(missing))
+    document_text = " ".join(
+        node.text or "" for node in root.iter() if node.tag.endswith("}t")
+    )
+    missing = [identifier for identifier in REQUIRED if identifier not in document_text]
+    if missing:
+        raise ValueError("SRS is missing expected content: " + ", ".join(missing))
 
-print("PASS: SRS DOCX integrity and required IDs")
+
+def main() -> None:
+    try:
+        validate_document()
+    except ValueError as error:
+        raise SystemExit(str(error)) from error
+    print("PASS: SRS DOCX integrity and required IDs")
+
+
+if __name__ == "__main__":
+    main()
