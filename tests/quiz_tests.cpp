@@ -58,21 +58,37 @@ int main() {
         std::ofstream emptyFile(fixture);
     }
     checkThrows([&fixture] { oqs::loadQuestions(fixture); },
-                "TC-LOAD-04 empty question bank is rejected");
+                "TC-LOAD-03 empty question bank is rejected");
     {
         std::ofstream malformedFile(fixture);
         malformedFile << "Question?|Only one option|1\n";
     }
     checkThrows([&fixture] { oqs::loadQuestions(fixture); },
-                "TC-LOAD-05 malformed question record is rejected");
+                "TC-LOAD-02 malformed question record is rejected");
+    {
+        std::ofstream malformedFile(fixture);
+        malformedFile << "Question?|Option one||2\n";
+    }
+    checkThrows([&fixture] { oqs::loadQuestions(fixture); },
+                "TC-LOAD-02 empty option is rejected");
+    {
+        std::ofstream malformedFile(fixture);
+        malformedFile << "Question?|Option one|Option two|3\n";
+    }
+    checkThrows([&fixture] { oqs::loadQuestions(fixture); },
+                "TC-LOAD-03 out-of-range answer key prevents starting a quiz");
     std::remove(fixture.c_str());
 
     const auto questions = sampleQuestions();
     const auto score = oqs::calculateScore(questions, {2, 1});
     check(score.correct == 1 && score.total == 2,
           "TC-SCORE-01 correct answers are counted accurately");
+    check(score.correct == 1,
+          "TC-SCORE-02 each correct response adds one and each incorrect adds zero");
+    check(score.correct == 1 && score.total == questions.size(),
+          "TC-SCORE-03 known response pattern returns expected count and total");
     checkThrows([&questions] { oqs::calculateScore(questions, {2}); },
-                "TC-SCORE-02 answer count mismatch is rejected");
+                "TC-UNIT-01 answer count mismatch is rejected");
     checkThrows([&questions] { oqs::calculateScore(questions, {4, 1}); },
                 "TC-INPUT-02 out-of-range answer is rejected by scoring");
 
@@ -84,13 +100,27 @@ int main() {
     check(output.str().find("Invalid choice") != std::string::npos,
           "TC-INPUT-03 malformed and out-of-range inputs produce feedback");
     check(output.str().find("Correct answer") == std::string::npos,
-          "TC-SEC-04 answer key is not revealed during the session");
+          "TC-QUIZ-03 and TC-SEC-04 answer key is not revealed before submission");
+    const auto firstQuestion = output.str().find("Question 1: 2 + 2?");
+    const auto secondQuestion = output.str().find("Question 2: Capital of France?");
+    check(firstQuestion != std::string::npos && secondQuestion > firstQuestion &&
+              output.str().find("Question 3:") == std::string::npos,
+          "TC-QUIZ-02 session presents every question once in sequence");
+    checkThrows([&questions] {
+        std::istringstream incompleteInput("2\n");
+        std::ostringstream incompleteOutput;
+        oqs::runSession(questions, incompleteInput, incompleteOutput);
+    }, "TC-REL-01 incomplete input ends safely");
 
     std::ostringstream results;
     oqs::displayResults({2, 2}, results);
     check(results.str().find("100.0%") != std::string::npos &&
               results.str().find("Incorrect answers: 0") != std::string::npos,
           "TC-RESULT-01 result summary and percentage are consistent");
+    std::ostringstream roundedResults;
+    oqs::displayResults({1, 3}, roundedResults);
+    check(roundedResults.str().find("33.3%") != std::string::npos,
+          "TC-SCORE-04 percentage is rounded to one decimal place");
 
     return failures == 0 ? 0 : 1;
 }

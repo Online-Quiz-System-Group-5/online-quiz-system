@@ -20,3 +20,5 @@ jobs:
         run: g++ -std=c++17 -Wall -Wextra -Wpedantic -Werror -Iinclude tests/quiz_tests.cpp src/quiz.cpp -o quiz_tests
       - name: Run tests
         run: ./quiz_tests
+      - name: Run CLI integration tests
+        run: bash tests/cli_tests.sh

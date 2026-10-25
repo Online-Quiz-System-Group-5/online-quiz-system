@@ -36,7 +36,13 @@ g++ -std=c++17 -Wall -Wextra -Wpedantic -Iinclude tests/quiz_tests.cpp src/quiz.
 ./quiz_tests
 ```
 
-GitHub Actions builds the application and runs the same test executable on each push and pull request. See `docs/SRS_Group5_Online_Quiz_System.docx` for the working requirements draft.
+Run the command-line replay integration check from the repository root after building the application:
+
+```sh
+bash tests/cli_tests.sh
+```
+
+GitHub Actions builds the application, runs the unit/integration harness, and checks replay and score reset on each push and pull request. See `docs/SRS_Group5_Online_Quiz_System.docx` for the working requirements draft and the [Group 5 Sprint board](https://github.com/orgs/Online-Quiz-System-Group-5/projects/1/views/1) for the prioritized backlog and estimates.
 
 ## Current scope
 
