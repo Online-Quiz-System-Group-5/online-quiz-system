@@ -10,10 +10,10 @@ permissions:
 
 jobs:
   build-and-test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: Build application
         run: g++ -std=c++17 -Wall -Wextra -Wpedantic -Werror -Iinclude src/main.cpp src/quiz.cpp -o online_quiz
       - name: Build test executable
