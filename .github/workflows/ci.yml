@@ -1,0 +1,18 @@
+name: C++ build and tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Build application
+        run: g++ -std=c++17 -Wall -Wextra -Wpedantic -Werror -Iinclude src/main.cpp src/quiz.cpp -o online_quiz
+      - name: Build test executable
+        run: g++ -std=c++17 -Wall -Wextra -Wpedantic -Werror -Iinclude tests/quiz_tests.cpp src/quiz.cpp -o quiz_tests
+      - name: Run tests
+        run: ./quiz_tests
