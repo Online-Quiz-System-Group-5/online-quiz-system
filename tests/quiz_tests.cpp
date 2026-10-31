@@ -94,6 +94,49 @@ int main() {
         check(false, "TC-LOAD-02 valid records support different option counts");
     }
     {
+        std::ofstream boundaryFile(fixture);
+        boundaryFile << "Lower boundary?|Yes|No|1\n"
+                     << "Upper boundary?|Yes|No|2"; // Final record without a newline.
+    }
+    try {
+        const auto boundaries = oqs::loadQuestions(fixture);
+        check(boundaries.size() == 2 && boundaries[0].options.size() == 2 &&
+                  boundaries[0].correctOption == 1 && boundaries[1].correctOption == 2,
+              "TC-LOAD-05 minimum option count and inclusive answer-key boundaries load");
+    } catch (const std::exception&) {
+        check(false, "TC-LOAD-05 minimum option count and inclusive answer-key boundaries load");
+    }
+    {
+        std::ofstream invalidFile(fixture);
+        invalidFile << "Question?|Only one option|1\n";
+    }
+    checkThrows([&fixture] { oqs::loadQuestions(fixture); },
+                "TC-LOAD-05 fewer than two options is rejected");
+    {
+        std::ofstream invalidFile(fixture);
+        invalidFile << "   |Option one|Option two|1\n";
+    }
+    checkThrows([&fixture] { oqs::loadQuestions(fixture); },
+                "TC-LOAD-05 whitespace-only prompt is rejected");
+    {
+        std::ofstream invalidFile(fixture);
+        invalidFile << "Question?|Option one|Option two|0\n";
+    }
+    checkThrows([&fixture] { oqs::loadQuestions(fixture); },
+                "TC-LOAD-05 answer key below the one-based range is rejected");
+    {
+        std::ofstream invalidFile(fixture);
+        invalidFile << "Question?|Option one|Option two|3\n";
+    }
+    checkThrows([&fixture] { oqs::loadQuestions(fixture); },
+                "TC-LOAD-05 answer key above the available options is rejected");
+    {
+        std::ofstream invalidFile(fixture);
+        invalidFile << "Question?|Option one|Option two|184467440737095516160\n";
+    }
+    checkThrows([&fixture] { oqs::loadQuestions(fixture); },
+                "TC-LOAD-05 answer key integer overflow is rejected");
+    {
         std::ofstream oversizedFile(fixture);
         oversizedFile << "Question?|" << std::string(64 * 1024, 'x') << "|1\n";
     }
