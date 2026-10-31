@@ -64,7 +64,7 @@ int main() {
         malformedFile << "Question?|Only one option|1\n";
     }
     checkThrows([&fixture] { oqs::loadQuestions(fixture); },
-                "TC-LOAD-02 malformed question record is rejected");
+                "TC-LOAD-02 / TC-SEC-03 malformed question data is rejected before play");
     {
         std::ofstream malformedFile(fixture);
         malformedFile << "Question?|Option one||2\n";
@@ -89,26 +89,31 @@ int main() {
         check(varied.size() == 2 && varied[0].options.size() == 2 &&
                   varied[0].correctOption == 1 && varied[1].options.size() == 4 &&
                   varied[1].correctOption == 4,
-              "TC-LOAD-02 valid records support different option counts");
+              "TC-LOAD-01 valid records support different option counts and upper answer boundary");
     } catch (const std::exception&) {
-        check(false, "TC-LOAD-02 valid records support different option counts");
+        check(false, "TC-LOAD-01 valid records support different option counts and upper answer boundary");
     }
     {
         std::ofstream oversizedFile(fixture);
         oversizedFile << "Question?|" << std::string(64 * 1024, 'x') << "|1\n";
     }
     checkThrows([&fixture] { oqs::loadQuestions(fixture); },
-                "TC-LOAD-04 oversized record is rejected safely");
+                "TC-LOAD-05 oversized record is rejected safely");
     std::remove(fixture.c_str());
 
     const auto questions = sampleQuestions();
     const auto score = oqs::calculateScore(questions, {2, 1});
     check(score.correct == 1 && score.total == 2,
-          "TC-SCORE-01 correct answers are counted accurately");
-    check(score.correct == 1,
-          "TC-SCORE-02 each correct response adds one and each incorrect adds zero");
-    check(score.correct == 1 && score.total == questions.size(),
-          "TC-SCORE-03 known response pattern returns expected count and total");
+          "TC-SCORE-01 mixed correct and incorrect answers produce the expected score");
+    const auto perfectScore = oqs::calculateScore(questions, {2, 2});
+    check(perfectScore.correct == 2 && perfectScore.total == 2,
+          "TC-SCORE-02 all correct answers reach the maximum score");
+    const auto zeroScore = oqs::calculateScore(questions, {1, 1});
+    check(zeroScore.correct == 0 && zeroScore.total == 2,
+          "TC-SCORE-03 all incorrect answers produce a zero score");
+    const auto emptyScore = oqs::calculateScore({}, {});
+    check(emptyScore.correct == 0 && emptyScore.total == 0,
+          "TC-SCORE-05 empty scoring input has a safe zero boundary");
     checkThrows([&questions] { oqs::calculateScore(questions, {2}); },
                 "TC-UNIT-01 answer count mismatch is rejected");
     checkThrows([&questions] { oqs::calculateScore(questions, {4, 1}); },
@@ -118,9 +123,13 @@ int main() {
     std::ostringstream output;
     const auto sessionScore = oqs::runSession(questions, input, output);
     check(sessionScore.correct == 1 && sessionScore.total == 2,
-          "TC-INT-01 session retries invalid input and completes");
+          "TC-INPUT-01 / TC-INT-01 valid choices complete a session after invalid-input retries");
     check(output.str().find("Invalid choice") != std::string::npos,
           "TC-INPUT-03 malformed and out-of-range inputs produce feedback");
+    check(output.str().find("  1. 3") != std::string::npos &&
+              output.str().find("  2. 4") != std::string::npos &&
+              output.str().find("  3. 5") != std::string::npos,
+          "TC-QUIZ-01 prompt options are displayed with one-based numbering");
     check(output.str().find("Correct answer") == std::string::npos,
           "TC-QUIZ-03 and TC-SEC-04 answer key is not revealed before submission");
     const auto firstQuestion = output.str().find("Question 1: 2 + 2?");
@@ -138,7 +147,12 @@ int main() {
     oqs::displayResults({2, 2}, results);
     check(results.str().find("100.0%") != std::string::npos &&
               results.str().find("Incorrect answers: 0") != std::string::npos,
-          "TC-RESULT-01 result summary and percentage are consistent");
+          "TC-RESULT-01 perfect result summary shows 100 percent and no incorrect answers");
+    std::ostringstream zeroResults;
+    oqs::displayResults({0, 3}, zeroResults);
+    check(zeroResults.str().find("Score: 0.0%") != std::string::npos &&
+              zeroResults.str().find("Incorrect answers: 3") != std::string::npos,
+          "TC-RESULT-04 zero-score boundary shows 0 percent and all incorrect answers");
     std::ostringstream roundedResults;
     oqs::displayResults({1, 3}, roundedResults);
     check(roundedResults.str().find("33.3%") != std::string::npos,
