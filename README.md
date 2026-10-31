@@ -26,6 +26,7 @@ Question text|Option one|Option two|Option three|2
 ```
 
 The delimiter cannot appear inside a field in this first version. The loader rejects empty prompts/options, invalid answer keys, missing files, and empty banks.
+Each record is limited to 64 KiB; oversized records are rejected before parsing.
 
 ## Tests
 

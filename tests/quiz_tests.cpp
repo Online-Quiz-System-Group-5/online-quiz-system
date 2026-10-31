@@ -79,6 +79,28 @@ int main() {
                 "TC-LOAD-03 out-of-range answer key prevents starting a quiz");
     std::remove(fixture.c_str());
 
+    {
+        std::ofstream variedFile(fixture);
+        variedFile << "Binary choice?|Yes|No|1\n"
+                   << "Four choices?|A|B|C|D|4\n";
+    }
+    try {
+        const auto varied = oqs::loadQuestions(fixture);
+        check(varied.size() == 2 && varied[0].options.size() == 2 &&
+                  varied[0].correctOption == 1 && varied[1].options.size() == 4 &&
+                  varied[1].correctOption == 4,
+              "TC-LOAD-02 valid records support different option counts");
+    } catch (const std::exception&) {
+        check(false, "TC-LOAD-02 valid records support different option counts");
+    }
+    {
+        std::ofstream oversizedFile(fixture);
+        oversizedFile << "Question?|" << std::string(64 * 1024, 'x') << "|1\n";
+    }
+    checkThrows([&fixture] { oqs::loadQuestions(fixture); },
+                "TC-LOAD-04 oversized record is rejected safely");
+    std::remove(fixture.c_str());
+
     const auto questions = sampleQuestions();
     const auto score = oqs::calculateScore(questions, {2, 1});
     check(score.correct == 1 && score.total == 2,

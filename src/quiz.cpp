@@ -11,6 +11,8 @@
 namespace oqs {
 namespace {
 
+constexpr std::size_t kMaximumRecordLength = 64 * 1024;
+
 std::vector<std::string> splitRecord(const std::string& line) {
     std::vector<std::string> fields;
     std::istringstream stream(line);
@@ -57,7 +59,26 @@ std::vector<Question> loadQuestions(const std::string& path) {
     std::vector<Question> questions;
     std::string line;
     std::size_t lineNumber = 0;
-    while (std::getline(file, line)) {
+    while (true) {
+        line.clear();
+        char character = '\0';
+        bool readAnyCharacter = false;
+        while (file.get(character)) {
+            readAnyCharacter = true;
+            if (character == '\n') {
+                break;
+            }
+            if (line.size() >= kMaximumRecordLength) {
+                throw std::runtime_error("question bank record exceeds the 64 KiB limit");
+            }
+            line.push_back(character);
+        }
+        if (file.bad()) {
+            throw std::runtime_error("error while reading question bank: " + path);
+        }
+        if (!readAnyCharacter) {
+            break;
+        }
         ++lineNumber;
         if (isBlank(line)) {
             continue;
