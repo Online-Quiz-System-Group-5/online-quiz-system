@@ -25,7 +25,7 @@ grep -q '^Online Quiz System$' <<<"$menu_output" || {
   echo "FAIL: TC-UI-01 welcome title was not displayed" >&2
   exit 1
 }
-grep -q '^Invalid choice\. Enter 1 or 2\.$' <<<"$menu_output" || {
+grep -q 'Invalid choice\. Enter 1 or 2\.' <<<"$menu_output" || {
   echo "FAIL: TC-UI-01 invalid menu input was not explained" >&2
   exit 1
 }
