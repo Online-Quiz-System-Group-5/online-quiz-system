@@ -30,6 +30,18 @@ void checkThrows(Function function, const std::string& name) {
     }
 }
 
+template <typename Function>
+void checkErrorContains(Function function,
+                        const std::string& expected,
+                        const std::string& name) {
+    try {
+        function();
+        check(false, name);
+    } catch (const std::exception& error) {
+        check(std::string(error.what()).find(expected) != std::string::npos, name);
+    }
+}
+
 std::vector<oqs::Question> sampleQuestions() {
     return {{"2 + 2?", {"3", "4", "5"}, 2},
             {"Capital of France?", {"Rome", "Paris", "Berlin"}, 2}};
@@ -77,6 +89,35 @@ int main() {
     }
     checkThrows([&fixture] { oqs::loadQuestions(fixture); },
                 "TC-LOAD-03 out-of-range answer key prevents starting a quiz");
+
+    {
+        std::ofstream malformedFile(fixture);
+        malformedFile << "Question?|Option one|Option two|two\n";
+    }
+    checkErrorContains([&fixture] { oqs::loadQuestions(fixture); },
+                       "line 1: correct option must be a whole number from 1 to 2",
+                       "TC-LOAD-06 invalid answer-key text explains the accepted value");
+    {
+        std::ofstream malformedFile(fixture);
+        malformedFile << "Valid?|A|B|1\nQuestion?|A|B|3\n";
+    }
+    checkErrorContains([&fixture] { oqs::loadQuestions(fixture); },
+                       "line 2: correct option is outside the valid range 1-2",
+                       "TC-LOAD-06 answer-key range error identifies the line and valid range");
+    {
+        std::ofstream malformedFile(fixture);
+        malformedFile << "Question?|Option one||2\n";
+    }
+    checkErrorContains([&fixture] { oqs::loadQuestions(fixture); },
+                       "line 1: option 2 is empty",
+                       "TC-LOAD-06 empty-option error identifies the option number");
+    {
+        std::ofstream malformedFile(fixture);
+        malformedFile << "Question?|Only one option|1\n";
+    }
+    checkErrorContains([&fixture] { oqs::loadQuestions(fixture); },
+                       "line 1: incomplete question record",
+                       "TC-LOAD-06 incomplete-record error describes the missing data");
     std::remove(fixture.c_str());
 
     {

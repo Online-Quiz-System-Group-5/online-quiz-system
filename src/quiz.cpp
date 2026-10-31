@@ -39,11 +39,18 @@ std::size_t parseCorrectOption(const std::string& value,
         parsed = std::stoul(value, &consumed);
     } catch (const std::exception&) {
         throw std::runtime_error("line " + std::to_string(lineNumber) +
-                                 ": correct option must be a number");
+                                 ": correct option must be a whole number from 1 to " +
+                                 std::to_string(optionCount));
     }
-    if (consumed != value.size() || parsed < 1 || parsed > optionCount) {
+    if (consumed != value.size()) {
         throw std::runtime_error("line " + std::to_string(lineNumber) +
-                                 ": correct option is outside the option range");
+                                 ": correct option must be a whole number from 1 to " +
+                                 std::to_string(optionCount));
+    }
+    if (parsed < 1 || parsed > optionCount) {
+        throw std::runtime_error("line " + std::to_string(lineNumber) +
+                                 ": correct option is outside the valid range 1-" +
+                                 std::to_string(optionCount));
     }
     return static_cast<std::size_t>(parsed);
 }
@@ -87,16 +94,17 @@ std::vector<Question> loadQuestions(const std::string& path) {
         const auto fields = splitRecord(line);
         if (fields.size() < 4) {
             throw std::runtime_error("line " + std::to_string(lineNumber) +
-                                     ": expected a prompt, at least two options, and an answer key");
+                                     ": incomplete question record; expected a prompt, at least two non-empty options, and a correct-option number");
         }
         if (isBlank(fields.front())) {
             throw std::runtime_error("line " + std::to_string(lineNumber) +
-                                     ": question prompt is empty");
+                                     ": question prompt is empty; add text before the first '|' delimiter");
         }
         for (std::size_t i = 1; i + 1 < fields.size(); ++i) {
             if (isBlank(fields[i])) {
                 throw std::runtime_error("line " + std::to_string(lineNumber) +
-                                         ": answer option is empty");
+                                         ": option " + std::to_string(i) +
+                                         " is empty; add text for every answer option");
             }
         }
 
