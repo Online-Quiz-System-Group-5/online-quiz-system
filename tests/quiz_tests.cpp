@@ -46,6 +46,22 @@ std::vector<oqs::Question> sampleQuestions() {
     return {{"2 + 2?", {"3", "4", "5"}, 2},
             {"Capital of France?", {"Rome", "Paris", "Berlin"}, 2}};
 }
+
+std::size_t countOccurrences(const std::string& text, const std::string& needle) {
+    std::size_t count = 0;
+    std::size_t position = 0;
+    while ((position = text.find(needle, position)) != std::string::npos) {
+        ++count;
+        position += needle.size();
+    }
+    return count;
+}
+
+std::size_t firstQuestionAnswerPrompts(const std::string& output) {
+    const auto secondQuestion = output.find("Question 2:");
+    const auto end = secondQuestion == std::string::npos ? output.size() : secondQuestion;
+    return countOccurrences(output.substr(0, end), "Your answer (");
+}
 } // namespace
 
 int main() {
@@ -226,6 +242,62 @@ int main() {
         std::ostringstream incompleteOutput;
         oqs::runSession(questions, incompleteInput, incompleteOutput);
     }, "TC-REL-01 incomplete input ends safely");
+
+    {
+        std::istringstream lowerBoundInput("0\n-1\n2\n2\n");
+        std::ostringstream lowerBoundOutput;
+        const auto lowerBoundScore =
+            oqs::runSession(questions, lowerBoundInput, lowerBoundOutput);
+        check(lowerBoundScore.correct == 2 && lowerBoundScore.total == 2 &&
+                  countOccurrences(lowerBoundOutput.str(), "Invalid choice") == 2 &&
+                  firstQuestionAnswerPrompts(lowerBoundOutput.str()) == 3,
+              "TC-INPUT-02 answers below the range are rejected and the question is repeated");
+    }
+
+    {
+        std::istringstream malformedInput("\n1.5\n1abc\n2\n2\n");
+        std::ostringstream malformedOutput;
+        const auto malformedScore =
+            oqs::runSession(questions, malformedInput, malformedOutput);
+        check(malformedScore.correct == 2 && malformedScore.total == 2 &&
+                  countOccurrences(malformedOutput.str(), "Invalid choice") == 3 &&
+                  firstQuestionAnswerPrompts(malformedOutput.str()) == 4,
+              "TC-INPUT-03 empty, decimal, and trailing-text answers are rejected before the question advances");
+    }
+
+    {
+        std::istringstream repeatedInvalidInput("0\nabc\n9\n2\n1\n");
+        std::ostringstream repeatedInvalidOutput;
+        const auto repeatedInvalidScore =
+            oqs::runSession(questions, repeatedInvalidInput, repeatedInvalidOutput);
+        check(repeatedInvalidScore.correct == 1 && repeatedInvalidScore.total == 2 &&
+                  countOccurrences(repeatedInvalidOutput.str(), "Invalid choice") == 3 &&
+                  countOccurrences(repeatedInvalidOutput.str(), "Question 1: 2 + 2?") == 1 &&
+                  countOccurrences(repeatedInvalidOutput.str(), "Question 2: Capital of France?") == 1 &&
+                  firstQuestionAnswerPrompts(repeatedInvalidOutput.str()) == 4,
+              "TC-INPUT-03 repeated invalid answers keep the same question active");
+    }
+
+    {
+        std::istringstream firstAnswerEofInput("");
+        std::ostringstream firstAnswerEofOutput;
+        checkErrorContains(
+            [&questions, &firstAnswerEofInput, &firstAnswerEofOutput] {
+                oqs::runSession(questions, firstAnswerEofInput, firstAnswerEofOutput);
+            },
+            "input ended before the quiz was complete",
+            "TC-REL-01 end-of-file at the first answer prompt reports the documented error");
+    }
+
+    {
+        std::istringstream orderInput("2\n2\n");
+        std::ostringstream orderOutput;
+        const auto orderScore = oqs::runSession(questions, orderInput, orderOutput);
+        check(orderScore.correct == 2 && orderScore.total == 2 &&
+                  countOccurrences(orderOutput.str(), "Question 1: 2 + 2?") == 1 &&
+                  countOccurrences(orderOutput.str(), "Question 2: Capital of France?") == 1,
+              "TC-QUIZ-02 every question is presented exactly once in order");
+    }
 
     std::ostringstream results;
     oqs::displayResults({2, 2}, results);
