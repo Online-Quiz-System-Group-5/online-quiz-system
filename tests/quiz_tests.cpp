@@ -199,7 +199,7 @@ int main() {
     check(emptyScore.correct == 0 && emptyScore.total == 0,
           "TC-SCORE-05 empty scoring input has a safe zero boundary");
     checkThrows([&questions] { oqs::calculateScore(questions, {2}); },
-                "TC-UNIT-01 answer count mismatch is rejected");
+                "TC-SCORE-07 incomplete answer set, including a skipped answer, is rejected");
     checkThrows([&questions] { oqs::calculateScore(questions, {4, 1}); },
                 "TC-INPUT-02 out-of-range answer is rejected by scoring");
 
@@ -241,6 +241,13 @@ int main() {
     oqs::displayResults({1, 3}, roundedResults);
     check(roundedResults.str().find("33.3%") != std::string::npos,
           "TC-SCORE-04 percentage is rounded to one decimal place");
+    std::ostringstream mixedResults;
+    oqs::displayResults(score, mixedResults);
+    check(mixedResults.str().find("Correct answers: 1\n") != std::string::npos &&
+              mixedResults.str().find("Incorrect answers: 1\n") != std::string::npos &&
+              mixedResults.str().find("Total questions: 2\n") != std::string::npos &&
+              mixedResults.str().find("Score: 50.0%\n") != std::string::npos,
+          "TC-SCORE-06 mixed-answer summary reports consistent correct, incorrect, total, and percentage values");
 
     return failures == 0 ? 0 : 1;
 }
