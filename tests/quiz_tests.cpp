@@ -241,6 +241,10 @@ int main() {
     oqs::displayResults({1, 3}, roundedResults);
     check(roundedResults.str().find("33.3%") != std::string::npos,
           "TC-SCORE-04 percentage is rounded to one decimal place");
+    checkThrows([] {
+        std::ostringstream invalidResults;
+        oqs::displayResults({2, 1}, invalidResults);
+    }, "TC-RESULT-05 inconsistent score totals are rejected");
 
     return failures == 0 ? 0 : 1;
 }

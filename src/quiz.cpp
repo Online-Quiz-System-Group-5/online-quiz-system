@@ -175,6 +175,9 @@ Score runSession(const std::vector<Question>& questions,
 }
 
 void displayResults(const Score& score, std::ostream& output) {
+    if (score.correct > score.total) {
+        throw std::invalid_argument("correct answer count cannot exceed total questions");
+    }
     const std::size_t incorrect = score.total - score.correct;
     const double percentage = score.total == 0
                                   ? 0.0
