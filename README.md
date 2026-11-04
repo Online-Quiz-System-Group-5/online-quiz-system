@@ -1,3 +1,4 @@
+
 # Group 5 Online Quiz System
 
 Console-based multiple-choice quiz game for Group 5's allocated Problem Statement 14. The assignment describes a C/C++ console application; this Sprint 1 prototype uses C++17 as a proposed implementation baseline.
@@ -7,7 +8,7 @@ Console-based multiple-choice quiz game for Group 5's allocated Problem Statemen
 Requires a C++17 compiler. From the repository root:
 
 ```sh
-g++ -std=c++17 -Wall -Wextra -Wpedantic -Iinclude src/main.cpp src/quiz.cpp -o online_quiz
+g++ -std=c++17 -Wall -Wextra -Wpedantic -Werror -Iinclude src/main.cpp src/quiz.cpp -o online_quiz
 ./online_quiz
 ```
 
@@ -32,7 +33,7 @@ The delimiter cannot appear inside a field in this first version. The loader rej
 Build and run the lightweight unit/integration test harness:
 
 ```sh
-g++ -std=c++17 -Wall -Wextra -Wpedantic -Iinclude tests/quiz_tests.cpp src/quiz.cpp -o quiz_tests
+g++ -std=c++17 -Wall -Wextra -Wpedantic -Werror -Iinclude tests/quiz_tests.cpp src/quiz.cpp -o quiz_tests
 ./quiz_tests
 ```
 
