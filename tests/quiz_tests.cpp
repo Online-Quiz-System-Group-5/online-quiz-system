@@ -313,6 +313,10 @@ int main() {
     oqs::displayResults({1, 3}, roundedResults);
     check(roundedResults.str().find("33.3%") != std::string::npos,
           "TC-SCORE-04 percentage is rounded to one decimal place");
+    checkThrows([] {
+        std::ostringstream invalidResults;
+        oqs::displayResults({2, 1}, invalidResults);
+    }, "TC-RESULT-05 inconsistent score totals are rejected");
     std::ostringstream mixedResults;
     oqs::displayResults(score, mixedResults);
     check(mixedResults.str().find("Correct answers: 1\n") != std::string::npos &&
