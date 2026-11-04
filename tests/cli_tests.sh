@@ -39,10 +39,38 @@ grep -q 'Invalid choice\. Enter 1 or 2\.' <<<"$menu_output" || {
 }
 echo "PASS: TC-UI-01 welcome, invalid menu recovery, and exit flow"
 
+invalid_answer_output=$(printf '1\nx\n1\n2\n2\n2\n1\n2\n' | ./online_quiz)
+grep -q 'Invalid choice\. Enter a number shown above\.' <<<"$invalid_answer_output" || {
+  echo "FAIL: TC-INPUT-03 invalid quiz answer was not explained" >&2
+  exit 1
+}
+grep -q '^Correct answers: 5$' <<<"$invalid_answer_output" || {
+  echo "FAIL: TC-INPUT-03 quiz did not recover and complete after an invalid answer" >&2
+  exit 1
+}
+echo "PASS: TC-INPUT-03 invalid quiz answer is rejected and the session recovers"
+
 bad_bank=$(mktemp)
 startup_output=$(mktemp)
 startup_error=$(mktemp)
-trap 'rm -f "$bad_bank" "$startup_output" "$startup_error"' EXIT
+midquiz_output=$(mktemp)
+midquiz_error=$(mktemp)
+trap 'rm -f "$bad_bank" "$startup_output" "$startup_error" "$midquiz_output" "$midquiz_error"' EXIT
+
+if printf '1\n' | ./online_quiz >"$midquiz_output" 2>"$midquiz_error"; then
+  echo "FAIL: TC-REL-01 incomplete mid-quiz input unexpectedly completed successfully" >&2
+  exit 1
+fi
+grep -q '^Quiz session ended: input ended before the quiz was complete$' "$midquiz_error" || {
+  echo "FAIL: TC-REL-01 mid-quiz end-of-input did not produce a controlled diagnostic" >&2
+  exit 1
+}
+! grep -q '^Quiz results$' "$midquiz_output" || {
+  echo "FAIL: TC-REL-01 incomplete mid-quiz input displayed a result summary" >&2
+  exit 1
+}
+echo "PASS: TC-REL-01 end-of-input during a quiz terminates with a clear diagnostic"
+
 printf 'Incomplete record|Only one option|1\n' >"$bad_bank"
 if ./online_quiz "$bad_bank" >"$startup_output" 2>"$startup_error"; then
   echo "FAIL: TC-LOAD-04 invalid bank unexpectedly started" >&2
