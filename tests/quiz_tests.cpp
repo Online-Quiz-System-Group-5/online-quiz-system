@@ -55,6 +55,21 @@ std::vector<oqs::Question> sampleQuestions() {
     };
 }
 
+std::size_t countOccurrences(const std::string& text, const std::string& needle) {
+    std::size_t count = 0;
+    std::size_t position = 0;
+    while ((position = text.find(needle, position)) != std::string::npos) {
+        ++count;
+        position += needle.size();
+    }
+    return count;
+}
+
+std::size_t firstQuestionAnswerPrompts(const std::string& output) {
+    const auto secondQuestion = output.find("Question 2:");
+    const auto end = secondQuestion == std::string::npos ? output.size() : secondQuestion;
+    return countOccurrences(output.substr(0, end), "Your answer (");
+}
 } // namespace
 
 int main() {
@@ -353,6 +368,12 @@ int main() {
         },
         "TC-INPUT-02 out-of-range answer is rejected by scoring"
     );
+    check(emptyScore.correct == 0 && emptyScore.total == 0,
+          "TC-SCORE-05 empty scoring input has a safe zero boundary");
+    checkThrows([&questions] { oqs::calculateScore(questions, {2}); },
+                "TC-SCORE-07 incomplete answer set, including a skipped answer, is rejected");
+    checkThrows([&questions] { oqs::calculateScore(questions, {4, 1}); },
+                "TC-INPUT-02 out-of-range answer is rejected by scoring");
 
     std::istringstream input("x\n4\n2\n1\n");
     std::ostringstream output;
@@ -472,6 +493,62 @@ int main() {
     // END OF NEW INTEGRATION TEST
     // =====================================================
 
+    {
+        std::istringstream lowerBoundInput("0\n-1\n2\n2\n");
+        std::ostringstream lowerBoundOutput;
+        const auto lowerBoundScore =
+            oqs::runSession(questions, lowerBoundInput, lowerBoundOutput);
+        check(lowerBoundScore.correct == 2 && lowerBoundScore.total == 2 &&
+                  countOccurrences(lowerBoundOutput.str(), "Invalid choice") == 2 &&
+                  firstQuestionAnswerPrompts(lowerBoundOutput.str()) == 3,
+              "TC-INPUT-02 answers below the range are rejected and the question is repeated");
+    }
+
+    {
+        std::istringstream malformedInput("\n1.5\n1abc\n2\n2\n");
+        std::ostringstream malformedOutput;
+        const auto malformedScore =
+            oqs::runSession(questions, malformedInput, malformedOutput);
+        check(malformedScore.correct == 2 && malformedScore.total == 2 &&
+                  countOccurrences(malformedOutput.str(), "Invalid choice") == 3 &&
+                  firstQuestionAnswerPrompts(malformedOutput.str()) == 4,
+              "TC-INPUT-03 empty, decimal, and trailing-text answers are rejected before the question advances");
+    }
+
+    {
+        std::istringstream repeatedInvalidInput("0\nabc\n9\n2\n1\n");
+        std::ostringstream repeatedInvalidOutput;
+        const auto repeatedInvalidScore =
+            oqs::runSession(questions, repeatedInvalidInput, repeatedInvalidOutput);
+        check(repeatedInvalidScore.correct == 1 && repeatedInvalidScore.total == 2 &&
+                  countOccurrences(repeatedInvalidOutput.str(), "Invalid choice") == 3 &&
+                  countOccurrences(repeatedInvalidOutput.str(), "Question 1: 2 + 2?") == 1 &&
+                  countOccurrences(repeatedInvalidOutput.str(), "Question 2: Capital of France?") == 1 &&
+                  firstQuestionAnswerPrompts(repeatedInvalidOutput.str()) == 4,
+              "TC-INPUT-03 repeated invalid answers keep the same question active");
+    }
+
+    {
+        std::istringstream firstAnswerEofInput("");
+        std::ostringstream firstAnswerEofOutput;
+        checkErrorContains(
+            [&questions, &firstAnswerEofInput, &firstAnswerEofOutput] {
+                oqs::runSession(questions, firstAnswerEofInput, firstAnswerEofOutput);
+            },
+            "input ended before the quiz was complete",
+            "TC-REL-01 end-of-file at the first answer prompt reports the documented error");
+    }
+
+    {
+        std::istringstream orderInput("2\n2\n");
+        std::ostringstream orderOutput;
+        const auto orderScore = oqs::runSession(questions, orderInput, orderOutput);
+        check(orderScore.correct == 2 && orderScore.total == 2 &&
+                  countOccurrences(orderOutput.str(), "Question 1: 2 + 2?") == 1 &&
+                  countOccurrences(orderOutput.str(), "Question 2: Capital of France?") == 1,
+              "TC-QUIZ-02 every question is presented exactly once in order");
+    }
+
     std::ostringstream results;
 
     oqs::displayResults({2, 2}, results);
@@ -500,6 +577,19 @@ int main() {
         roundedResults.str().find("33.3%") != std::string::npos,
         "TC-SCORE-04 percentage is rounded to one decimal place"
     );
+    check(roundedResults.str().find("33.3%") != std::string::npos,
+          "TC-SCORE-04 percentage is rounded to one decimal place");
+    checkThrows([] {
+        std::ostringstream invalidResults;
+        oqs::displayResults({2, 1}, invalidResults);
+    }, "TC-RESULT-05 inconsistent score totals are rejected");
+    std::ostringstream mixedResults;
+    oqs::displayResults(score, mixedResults);
+    check(mixedResults.str().find("Correct answers: 1\n") != std::string::npos &&
+              mixedResults.str().find("Incorrect answers: 1\n") != std::string::npos &&
+              mixedResults.str().find("Total questions: 2\n") != std::string::npos &&
+              mixedResults.str().find("Score: 50.0%\n") != std::string::npos,
+          "TC-SCORE-06 mixed-answer summary reports consistent correct, incorrect, total, and percentage values");
 
     return failures == 0 ? 0 : 1;
 }
