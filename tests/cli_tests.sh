@@ -17,8 +17,24 @@ grep -q '^Correct answers: 5$' <<<"$output" || {
   exit 1
 }
 
+first_summary=$(awk '/^Quiz results$/ { attempt++; capture = attempt == 1 }
+  capture { print; if (/^Score:/) exit }' <<<"$output")
+second_summary=$(awk '/^Quiz results$/ { attempt++; capture = attempt == 2 }
+  capture { print; if (/^Score:/) exit }' <<<"$output")
+expected_first_summary=$'Quiz results\nCorrect answers: 2\nIncorrect answers: 3\nTotal questions: 5\nScore: 40.0%'
+expected_second_summary=$'Quiz results\nCorrect answers: 5\nIncorrect answers: 0\nTotal questions: 5\nScore: 100.0%'
+[[ "$first_summary" == "$expected_first_summary" ]] || {
+  echo "FAIL: TC-RESULT-05 first attempt summary totals are inconsistent" >&2
+  exit 1
+}
+[[ "$second_summary" == "$expected_second_summary" ]] || {
+  echo "FAIL: TC-RESULT-05 replay summary totals are inconsistent" >&2
+  exit 1
+}
+
 echo "PASS: TC-RESULT-02 replay starts a second quiz"
 echo "PASS: TC-RESULT-03 replay resets the score"
+echo "PASS: TC-RESULT-05 each attempt displays a consistent result summary"
 
 menu_output=$(printf 'x\n2\n' | ./online_quiz)
 grep -q '^Online Quiz System$' <<<"$menu_output" || {
