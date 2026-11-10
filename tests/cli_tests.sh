@@ -1,3 +1,4 @@
+
 #!/usr/bin/env bash
 set -euo pipefail
 
@@ -69,6 +70,12 @@ echo "PASS: TC-INPUT-03 invalid quiz answer is rejected and the session recovers
 bad_bank=$(mktemp)
 startup_output=$(mktemp)
 startup_error=$(mktemp)
+menu_eof_output=$(mktemp)
+menu_eof_error=$(mktemp)
+quiz_eof_output=$(mktemp)
+quiz_eof_error=$(mktemp)
+
+trap 'rm -f "$bad_bank" "$startup_output" "$startup_error" "$menu_eof_output" "$menu_eof_error" "$quiz_eof_output" "$quiz_eof_error"' EXIT
 midquiz_output=$(mktemp)
 midquiz_error=$(mktemp)
 trap 'rm -f "$bad_bank" "$startup_output" "$startup_error" "$midquiz_output" "$midquiz_error"' EXIT
@@ -101,3 +108,39 @@ grep -q '^Unable to start quiz: line 1:' "$startup_error" || {
   exit 1
 }
 echo "PASS: TC-LOAD-04 malformed bank fails safely with a startup diagnostic"
+
+# EOF at the menu should exit gracefully.
+if ./online_quiz </dev/null >"$menu_eof_output" 2>"$menu_eof_error"; then
+  menu_eof_status=0
+else
+  menu_eof_status=$?
+fi
+
+[[ "$menu_eof_status" -eq 0 ]] || {
+  echo "FAIL: TC-INPUT-04 EOF at menu did not exit successfully" >&2
+  exit 1
+}
+grep -q '^Online Quiz System$' "$menu_eof_output" || {
+  echo "FAIL: TC-INPUT-04 EOF at menu did not display the welcome title" >&2
+  exit 1
+}
+echo "PASS: TC-INPUT-04 EOF at menu exits gracefully"
+
+# EOF during a quiz should report the incomplete input safely.
+if printf '1\n' | ./online_quiz >"$quiz_eof_output" 2>"$quiz_eof_error"; then
+  quiz_eof_status=0
+else
+  quiz_eof_status=$?
+fi
+
+[[ "$quiz_eof_status" -ne 0 ]] || {
+  echo "FAIL: TC-INPUT-05 incomplete quiz unexpectedly succeeded" >&2
+  exit 1
+}
+
+if ! grep -q 'Quiz session ended: input ended before the quiz was complete' "$quiz_eof_output" &&
+   ! grep -q 'Quiz session ended: input ended before the quiz was complete' "$quiz_eof_error"; then
+  echo "FAIL: TC-INPUT-05 incomplete quiz did not explain the EOF error" >&2
+  exit 1
+fi
+echo "PASS: TC-INPUT-05 EOF during quiz is handled safely"
