@@ -50,6 +50,28 @@
     date.textContent = new Date(saved.date).toLocaleString();
   }
 
+  function updateHistory() {
+    const history = window.QuizCore.readResultHistory(getBrowserStorage());
+    const list = $("[data-history-list]");
+    list.innerHTML = history.entries.map((entry) => {
+      const date = new Date(entry.date).toLocaleString();
+      return `<li class="history-item">
+        <div class="history-item-main"><time datetime="${escapeHTML(entry.date)}">${escapeHTML(date)}</time><div class="history-item-bank">${escapeHTML(entry.bankLabel)}</div></div>
+        <div class="history-item-score"><strong>${entry.percentage}%</strong><span>${entry.correct} of ${entry.total} correct</span></div>
+      </li>`;
+    }).join("");
+    $("[data-history-count]").textContent = String(history.entries.length);
+    $("[data-history-empty]").hidden = history.entries.length > 0;
+    $("[data-history-cap]").hidden = history.entries.length < window.QuizCore.maxResultHistoryEntries;
+    const warning = $("[data-history-warning]");
+    warning.hidden = history.status === "ok";
+    warning.textContent = history.status === "corrupt"
+      ? "Some saved history data was damaged. Valid entries are shown; clear history to remove the damaged data."
+      : "This browser does not allow local storage, so quiz history is unavailable.";
+    $("[data-history-clear]").hidden = history.status === "unavailable"
+      || (history.entries.length === 0 && history.status === "ok");
+  }
+
   function updateHome() {
     const ready = state.bankQuestions.length > 0;
     const countInput = $("[data-question-count]");
@@ -213,7 +235,9 @@
     cancelQuestionTimer();
     const result = window.QuizCore.scoreQuiz(state.questions, state.answers);
     const resultSaved = window.QuizCore.saveLatestResult(getBrowserStorage(), result, state.source);
+    const historySaved = window.QuizCore.appendResultHistory(getBrowserStorage(), result, state.source);
     updateLatestResult();
+    updateHistory();
     const heading = result.percentage === 100 ? "Perfect round. Amazing." : result.percentage >= 70 ? "Look at you go." : "Good work showing up.";
     $("[data-result-title]").textContent = heading;
     $("[data-result-subtitle]").textContent = result.percentage >= 70
@@ -238,7 +262,7 @@
       </article>`;
     }).join("");
     showScreen("results");
-    if (!resultSaved) announce("Your result is shown, but this browser could not save it for later.");
+    if (!resultSaved || !historySaved) announce("Your result is shown, but this browser could not save all score details for later.");
   }
 
   async function loadDefaultQuestions() {
@@ -295,6 +319,19 @@
     timerSettings.hidden = !timerEnabledInput.checked;
     timerSecondsInput.disabled = !timerEnabledInput.checked;
     $("[data-home-error]").hidden = true;
+  });
+  $$('[data-history-open]').forEach((button) => button.addEventListener("click", () => {
+    updateHistory();
+    showScreen("history");
+  }));
+  $$('[data-history-home]').forEach((button) => button.addEventListener("click", () => showScreen("home")));
+  $("[data-history-clear]").addEventListener("click", () => {
+    if (window.QuizCore.clearResultHistory(getBrowserStorage())) {
+      updateHistory();
+      announce("Quiz history was cleared from this device.");
+    } else {
+      announce("This browser could not clear quiz history.");
+    }
   });
   $("[data-preview-toggle]").addEventListener("click", (event) => {
     const button = event.currentTarget;
@@ -360,5 +397,6 @@
   });
 
   updateLatestResult();
+  updateHistory();
   loadDefaultQuestions();
 })();

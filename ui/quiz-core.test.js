@@ -2,7 +2,7 @@
 
 const test = require("node:test");
 const assert = require("node:assert/strict");
-const { parseQuestionBank, inspectQuestionBank, scoreQuiz, prepareQuiz, isTimerExpired, resolveTimedAnswer, createTimerController, saveLatestResult, readLatestResult, clearLatestResult } = require("./quiz-core.js");
+const { parseQuestionBank, inspectQuestionBank, scoreQuiz, prepareQuiz, isTimerExpired, resolveTimedAnswer, createTimerController, saveLatestResult, readLatestResult, clearLatestResult, readResultHistory, appendResultHistory, clearResultHistory, maxResultHistoryEntries } = require("./quiz-core.js");
 
 test("loads multiple records and converts one-based keys", () => {
   const questions = parseQuestionBank("First?|A|B|2\r\nSecond?|Yes|No|Maybe|1\r\n");
@@ -92,6 +92,37 @@ test("handles corrupted or unavailable result storage safely", () => {
   assert.equal(readLatestResult(storage), null);
   assert.equal(readLatestResult(null), null);
   assert.equal(saveLatestResult(storage, { correct: 1, total: 1, percentage: 100 }, "Bank"), false);
+});
+
+test("records score history metadata and retains only the newest entries", () => {
+  const values = new Map();
+  const storage = {
+    setItem: (key, value) => values.set(key, value),
+    getItem: (key) => values.get(key) ?? null,
+    removeItem: (key) => values.delete(key)
+  };
+  for (let index = 0; index < maxResultHistoryEntries + 2; index += 1) {
+    assert.equal(appendResultHistory(storage, { correct: 1, total: 2, percentage: 50 }, `Bank ${index}`, new Date(2026, 0, index + 1)), true);
+  }
+  const history = readResultHistory(storage);
+  assert.equal(history.status, "ok");
+  assert.equal(history.entries.length, maxResultHistoryEntries);
+  assert.equal(history.entries[0].bankLabel, "Bank 21");
+  assert.equal(history.entries.at(-1).bankLabel, "Bank 2");
+  assert.deepEqual(Object.keys(history.entries[0]).sort(), ["bankLabel", "correct", "date", "percentage", "total"]);
+  assert.equal(clearResultHistory(storage), true);
+  assert.deepEqual(readResultHistory(storage), { entries: [], status: "ok" });
+});
+
+test("marks corrupted and unavailable histories for the UI to explain", () => {
+  assert.deepEqual(readResultHistory(null), { entries: [], status: "unavailable" });
+  assert.deepEqual(readResultHistory({ getItem: () => "not-json" }), { entries: [], status: "corrupt" });
+  const partiallyValid = readResultHistory({ getItem: () => JSON.stringify([
+    { correct: 1, total: 1, percentage: 100, date: "2026-11-12T00:00:00.000Z", bankLabel: "Good" },
+    { answers: [0], question: "Should not be stored" }
+  ]) });
+  assert.equal(partiallyValid.status, "corrupt");
+  assert.equal(partiallyValid.entries.length, 1);
 });
 
 test("prepares the requested quiz length and keeps answer keys attached", () => {

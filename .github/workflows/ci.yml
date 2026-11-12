@@ -22,5 +22,5 @@ jobs:
         run: ./quiz_tests
       - name: Run CLI integration tests
         run: bash tests/cli_tests.sh
-      - name: Run web UI unit tests
-        run: node --test ui/quiz-core.test.js
+      - name: Run web UI unit and integration tests
+        run: node --test ui/quiz-core.test.js ui/app.integration.test.js ui/server.test.js

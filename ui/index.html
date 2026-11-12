@@ -19,6 +19,7 @@
       </a>
       <div class="topbar-right">
         <span class="local-badge"><span class="status-dot"></span> Local session</span>
+        <button class="text-button history-nav" type="button" data-history-open>History <span data-history-count>0</span></button>
         <button class="icon-button" type="button" aria-label="How it works" data-help-open>
           <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M9.7 9a2.4 2.4 0 1 1 4.1 1.7c-1.1 1-1.8 1.3-1.8 2.8M12 17h.01"></path></svg>
         </button>
@@ -96,7 +97,10 @@
             <p class="latest-meta">Question bank: <strong data-latest-bank></strong></p>
             <p class="latest-meta">Completed <time data-latest-date></time></p>
           </div>
-          <button class="button button-secondary" type="button" data-clear-latest>Clear saved result</button>
+          <div class="latest-actions">
+            <button class="button button-secondary" type="button" data-history-open>View history</button>
+            <button class="button button-secondary" type="button" data-clear-latest>Clear saved result</button>
+          </div>
         </section>
       </section>
 
@@ -150,6 +154,32 @@
           <div class="review-heading"><div><p class="eyebrow"><span class="eyebrow-line"></span> ANSWER REVIEW</p><h2>What you answered</h2></div><span class="review-count" data-review-count></span></div>
           <div class="review-list" data-review-list></div>
           <div class="results-actions"><button class="button button-primary button-large" type="button" data-retry>Try again <span aria-hidden="true">↻</span></button><button class="button button-secondary button-large" type="button" data-home>Back to home</button></div>
+        </div>
+      </section>
+
+      <section class="screen history-screen" data-screen="history" aria-labelledby="history-title" hidden>
+        <div class="history-wrap">
+          <div class="history-topline">
+            <button class="text-button" type="button" data-history-home>← <span>Back to quiz</span></button>
+            <span class="local-badge"><span class="status-dot"></span> Stored on this device</span>
+          </div>
+          <div class="history-intro">
+            <p class="eyebrow"><span class="eyebrow-line"></span> YOUR PROGRESS</p>
+            <h1 id="history-title">Quiz history</h1>
+            <p>See the date, question bank, and score for recent attempts. Answers and question text are never saved here.</p>
+          </div>
+          <p class="history-warning" data-history-warning role="alert" hidden></p>
+          <p class="history-cap" data-history-cap hidden>Showing your 20 most recent attempts.</p>
+          <div class="history-empty" data-history-empty hidden>
+            <span class="empty-history-mark" aria-hidden="true">↗</span>
+            <h2>No quiz attempts yet</h2>
+            <p>Finish a quiz and your score details will appear here.</p>
+            <button class="button button-primary" type="button" data-history-home>Back to quiz</button>
+          </div>
+          <ol class="history-list" data-history-list></ol>
+          <div class="history-actions">
+            <button class="button button-secondary" type="button" data-history-clear hidden>Clear history</button>
+          </div>
         </div>
       </section>
     </main>
