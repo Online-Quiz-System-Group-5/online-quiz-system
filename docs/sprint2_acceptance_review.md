@@ -37,7 +37,7 @@
 | OQS-NF-002 | TC-PERF-02 | Quiz session response time | NOT TESTED | No timing measurements for 10 consecutive prompts recorded | |
 | OQS-NF-003 | TC-REL-01 | Application error handling | PASS | Both suites — incomplete input and EOF are handled safely with documented diagnostics | |
 | OQS-NF-004 | TC-DOC-01 | README / user documentation | NOT TESTED | Clean-checkout documentation walkthrough not recorded | |
-| OQS-NF-005 | CI-BUILD-01 | Build configuration / CI | NOT TESTED | Both CI-equivalent builds succeeded locally with `-Werror`; GitHub Actions verification pending | |
+| OQS-NF-005 | CI-BUILD-01 | Build configuration / CI | NOT TESTED | Local compilation succeeded; GitHub Actions verification pending | |
 
 ## Security requirements
 
@@ -52,6 +52,56 @@
 ## Additional regression coverage
 
 The following additional cases were also displayed as passing in the executed unit and CLI test suites:
+
+- `TC-LOAD-05` — minimum option count, inclusive answer-key boundaries, malformed records, and invalid option counts.
+- `TC-LOAD-06` — invalid answer-key text, answer-key range errors, incomplete records, and missing data.
+- `TC-UNIT-01` — answer-count mismatch rejection.
+- `TC-INT-01` — valid choices complete a session after invalid-input retries.
+- `TC-INT-02` — complete load, quiz, score, and results flow.
+- `TC-RESULT-04` — zero-score result boundary.
+- `TC-RESULT-05` — inconsistent score totals are rejected.
+- `TC-SCORE-05` — empty scoring input has a safe zero boundary.
+- `TC-SCORE-06` — mixed-answer summary reports consistent correct, incorrect, total, and percentage values.
+- `TC-SCORE-07` — incomplete answer sets, including skipped answers, are rejected.
+
+### CLI integration test results
+
+| Test case | Behavior checked | Result |
+|---|---|---|
+| TC-RESULT-02 | Replay starts a second quiz | PASS |
+| TC-RESULT-03 | Replay resets the score | PASS |
+| TC-RESULT-05 | Consistent result summary | PASS |
+| TC-UI-01 | Welcome, invalid menu recovery, and exit flow | PASS |
+| TC-INPUT-03 | Invalid answer rejection and session recovery | PASS |
+| TC-REL-01 | EOF during a quiz exits with a clear diagnostic | PASS |
+| TC-LOAD-04 | Malformed question bank fails safely | PASS |
+| TC-INPUT-04 | EOF at menu and during quiz | PASS |
+
+**CLI integration result: 8 PASS, 0 FAIL.**
+
+### C++ unit test results
+
+The `tests/quiz_tests.cpp` executable was compiled and executed successfully.
+
+All test cases displayed in the terminal output passed. The suite covers:
+
+- Question-bank loading and validation.
+- Missing and malformed question-bank data.
+- Answer-option boundaries and invalid input.
+- Quiz flow and question sequencing.
+- Scoring and percentage calculations.
+- Result summaries and replay-state handling.
+- EOF and incomplete-input handling.
+- Answer-key confidentiality checks.
+
+**C++ unit-test result: All displayed test cases PASS.**
+
+## Additional regression coverage
+
+The following additional cases were also displayed as passing in the executed unit and CLI test suites:
+| Defect | Requirement ID | Description | GitHub issue/PR |
+|---|---|---|---|
+| None identified during executed regression tests | — | No failures were reported by either executed test suite. Untested requirements remain subject to separate verification. | |
 
 - `TC-LOAD-05` — minimum option count, inclusive answer-key boundaries, malformed records, and invalid option counts.
 - `TC-LOAD-06` — invalid answer-key text, answer-key range errors, incomplete records, and missing data.
