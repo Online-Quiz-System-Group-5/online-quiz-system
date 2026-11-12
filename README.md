@@ -1,28 +1,65 @@
 # Group 5 Online Quiz System
 
-A console-based multiple-choice quiz application developed in C++17
-for Group 5's allocated Problem Statement 14.
+A local multiple-choice quiz project for Group 5's allocated Problem Statement 14. The project includes the original C++17 command-line application and a browser-based interface that follows the same question-bank format and scoring rules.
 
 ## Features
 
-- Console-based quiz interface.
-- Multiple-choice questions loaded from a local file.
-- Input validation and error handling.
-- Automatic score calculation.
-- Quiz result summary with percentage.
-- Option to replay the quiz.
-- Unit and integration tests.
+- C++17 command-line quiz with question-bank validation and replay.
+- Responsive browser UI with welcome, quiz, result, answer-review, and help screens.
+- Load the sample bank or import another UTF-8 `.txt` question bank.
+- Answer selection by mouse or number keys, progress display, safe exit, and replay.
+- Automatic score calculation without revealing the answer key during the quiz.
+- C++ and browser-core unit/integration tests.
 
-## Requirements
+## Question-bank format
 
-- C++17-compatible compiler.
-- Git (optional, for repository operations).
+Each non-empty line contains the question, at least two options, and a one-based correct-option number, separated by `|`:
 
-## Build and Run
+```text
+Question text|Option one|Option two|Option three|2
+```
 
-Run these commands from the repository root.
+The delimiter cannot appear inside a field. Blank lines are ignored. The C++ loader rejects empty prompts/options, invalid answer keys, missing files, empty banks, and records over 64 KiB.
 
-### Build the application
+## Run the command-line app
 
-```bash
+Requires a C++17 compiler. From the repository root:
+
+```sh
 g++ -std=c++17 -Wall -Wextra -Wpedantic -Iinclude src/main.cpp src/quiz.cpp -o online_quiz
+./online_quiz
+```
+
+Pass an alternate question bank as the first argument:
+
+```sh
+./online_quiz data/questions.txt
+```
+
+## Run the web UI
+
+Requires Node.js 18 or later. From the repository root:
+
+```sh
+node ui/server.js
+```
+
+Open <http://127.0.0.1:4173/>. The server binds only to the local computer, serves the UI files, and provides the existing sample bank at `/questions.txt`. Imported question banks and answers remain in the browser session; the UI has no account or remote service.
+
+## Tests
+
+Build and run the C++ unit/integration harness:
+
+```sh
+g++ -std=c++17 -Wall -Wextra -Wpedantic -Iinclude tests/quiz_tests.cpp src/quiz.cpp -o quiz_tests
+./quiz_tests
+bash tests/cli_tests.sh
+```
+
+Run UI parsing/scoring tests with Node.js:
+
+```sh
+node --test ui/quiz-core.test.js
+```
+
+GitHub Actions builds the C++ app and tests and runs the UI unit tests on pushes and pull requests.
