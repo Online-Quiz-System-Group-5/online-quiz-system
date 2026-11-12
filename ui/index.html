@@ -50,8 +50,14 @@
               <span class="source-icon" aria-hidden="true">↳</span>
               <span>Question bank: <strong data-source-name>Loading sample questions</strong></span>
               <label class="file-button" for="question-file">Change file</label>
+              <button class="file-button preview-toggle" type="button" data-preview-toggle aria-expanded="false" aria-controls="bank-preview">Preview questions</button>
               <input class="visually-hidden" id="question-file" type="file" accept=".txt,text/plain">
             </div>
+            <section class="bank-preview" id="bank-preview" data-bank-preview aria-labelledby="preview-title" hidden>
+              <div class="preview-heading"><h2 id="preview-title">Question bank preview</h2><span data-preview-summary></span></div>
+              <ol class="preview-questions" data-preview-questions></ol>
+              <div class="preview-errors" data-preview-errors role="alert" hidden></div>
+            </section>
             <p class="inline-error" role="alert" data-home-error hidden></p>
           </div>
           <aside class="hero-art" aria-label="Quiz overview">

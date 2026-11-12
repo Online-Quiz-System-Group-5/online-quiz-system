@@ -2,7 +2,7 @@
 
 const test = require("node:test");
 const assert = require("node:assert/strict");
-const { parseQuestionBank, scoreQuiz, prepareQuiz } = require("./quiz-core.js");
+const { parseQuestionBank, inspectQuestionBank, scoreQuiz, prepareQuiz } = require("./quiz-core.js");
 
 test("loads multiple records and converts one-based keys", () => {
   const questions = parseQuestionBank("First?|A|B|2\r\nSecond?|Yes|No|Maybe|1\r\n");
@@ -63,4 +63,25 @@ test("rejects quiz sizes below one, above the bank, and for an empty bank", () =
   assert.throws(() => prepareQuiz(bank, { count: 0 }), /between 1 and 1/i);
   assert.throws(() => prepareQuiz(bank, { count: 2 }), /between 1 and 1/i);
   assert.throws(() => prepareQuiz([], { count: 1 }), /at least one question/i);
+});
+
+test("previews valid questions and reports each malformed record with its line", () => {
+  const report = inspectQuestionBank("Good question?|A|B|1\nBroken question|only two fields\nAnother good one|X|Y|Z|2");
+  assert.deepEqual(report.questions.map(({ prompt, options }) => ({ prompt, optionCount: options.length })), [
+    { prompt: "Good question?", optionCount: 2 },
+    { prompt: "Another good one", optionCount: 3 }
+  ]);
+  assert.deepEqual(report.errors, [{
+    line: 2,
+    message: "Line 2: add a question, at least two options, and the correct option number."
+  }]);
+});
+
+test("reports an empty question bank without losing line-specific errors", () => {
+  assert.deepEqual(inspectQuestionBank("\n\n").errors, [{
+    line: null,
+    message: "This question bank has no usable questions."
+  }]);
+  assert.equal(inspectQuestionBank("Broken|record").questions.length, 0);
+  assert.equal(inspectQuestionBank("Broken|record").errors[0].line, 1);
 });
