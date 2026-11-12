@@ -40,6 +40,13 @@
               <label class="setup-shuffle"><input type="checkbox" data-shuffle> <span>Shuffle question order</span></label>
             </div>
             <p class="setup-help" id="setup-help" data-setup-help>Choose how many questions to answer.</p>
+            <div class="timer-setup">
+              <label class="setup-shuffle"><input type="checkbox" data-timer-enabled> <span>Use a per-question timer</span></label>
+              <label class="setup-count timer-length" data-timer-setting hidden for="timer-seconds">
+                <span>Seconds per question</span>
+                <input id="timer-seconds" type="number" min="5" max="120" value="30" inputmode="numeric" data-timer-seconds>
+              </label>
+            </div>
             <div class="hero-actions">
               <button class="button button-primary button-large" type="button" data-start disabled>
                 Start quiz <span aria-hidden="true">→</span>
@@ -89,6 +96,7 @@
             <div class="quiz-heading-row">
               <button class="text-button" type="button" data-quit>← <span>Exit quiz</span></button>
               <span class="quiz-session-label"><span class="status-dot"></span> QUIZ IN PROGRESS</span>
+              <span class="quiz-timer" data-question-timer role="timer" aria-live="polite" hidden><span>TIME LEFT</span><strong data-timer-value>00:30</strong></span>
             </div>
             <div class="progress-row">
               <span class="progress-caption" data-progress-text>QUESTION 1 OF 5</span>

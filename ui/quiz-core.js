@@ -52,6 +52,7 @@
     }
     const correct = questions.reduce((count, question, index) => {
       const answer = answers[index];
+      if (answer === null) return count;
       if (!Number.isInteger(answer) || answer < 0 || answer >= question.options.length) {
         throw new Error(`Answer ${index + 1} is outside the available options.`);
       }
@@ -59,6 +60,35 @@
     }, 0);
     return { correct, total: questions.length, incorrect: questions.length - correct,
       percentage: questions.length ? Math.round((correct / questions.length) * 100) : 0 };
+  }
+
+  function isTimerExpired(deadline, now = Date.now()) {
+    return Number.isFinite(deadline) && Number.isFinite(now) && now > deadline;
+  }
+
+  function resolveTimedAnswer(selected, deadline, now = Date.now()) {
+    if (selected === null) return null;
+    return deadline === null || now <= deadline ? selected : null;
+  }
+
+  function createTimerController({ setIntervalFn = setInterval, clearIntervalFn = clearInterval } = {}) {
+    let handle = null;
+    return {
+      start(callback, intervalMs = 200) {
+        this.cancel();
+        handle = setIntervalFn(callback, intervalMs);
+        return handle;
+      },
+      cancel() {
+        if (handle !== null) {
+          clearIntervalFn(handle);
+          handle = null;
+        }
+      },
+      get active() {
+        return handle !== null;
+      }
+    };
   }
 
   function prepareQuiz(questions, options = {}) {
@@ -85,5 +115,6 @@
     return selected.slice(0, count);
   }
 
-  return { parseQuestionBank, inspectQuestionBank, scoreQuiz, prepareQuiz };
+  return { parseQuestionBank, inspectQuestionBank, scoreQuiz, prepareQuiz,
+    isTimerExpired, resolveTimedAnswer, createTimerController };
 });
