@@ -88,6 +88,16 @@
           <div class="how-divider" aria-hidden="true"></div>
           <div class="how-card"><span class="step-number">03</span><div><strong>See your progress</strong><p>Get a score and review at the end.</p></div></div>
         </div>
+        <section class="latest-result" data-latest-result aria-labelledby="latest-result-title" hidden>
+          <div>
+            <p class="eyebrow"><span class="eyebrow-line"></span> SAVED ON THIS DEVICE</p>
+            <h2 id="latest-result-title">Your latest result</h2>
+            <p class="latest-score"><strong data-latest-score></strong><span data-latest-count></span></p>
+            <p class="latest-meta">Question bank: <strong data-latest-bank></strong></p>
+            <p class="latest-meta">Completed <time data-latest-date></time></p>
+          </div>
+          <button class="button button-secondary" type="button" data-clear-latest>Clear saved result</button>
+        </section>
       </section>
 
       <section class="screen quiz-screen" data-screen="quiz" aria-labelledby="quiz-title" hidden>

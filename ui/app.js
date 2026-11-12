@@ -29,6 +29,27 @@
     toastTimer = setTimeout(() => { toast.hidden = true; }, 2600);
   }
 
+  function getBrowserStorage() {
+    try {
+      return window.localStorage;
+    } catch {
+      return null;
+    }
+  }
+
+  function updateLatestResult() {
+    const panel = $("[data-latest-result]");
+    const saved = window.QuizCore.readLatestResult(getBrowserStorage());
+    panel.hidden = !saved;
+    if (!saved) return;
+    $("[data-latest-score]").textContent = `${saved.percentage}%`;
+    $("[data-latest-count]").textContent = `${saved.correct} of ${saved.total} correct`;
+    $("[data-latest-bank]").textContent = saved.bankLabel;
+    const date = $("[data-latest-date]");
+    date.dateTime = saved.date;
+    date.textContent = new Date(saved.date).toLocaleString();
+  }
+
   function updateHome() {
     const ready = state.bankQuestions.length > 0;
     const countInput = $("[data-question-count]");
@@ -191,6 +212,8 @@
   function showResults() {
     cancelQuestionTimer();
     const result = window.QuizCore.scoreQuiz(state.questions, state.answers);
+    const resultSaved = window.QuizCore.saveLatestResult(getBrowserStorage(), result, state.source);
+    updateLatestResult();
     const heading = result.percentage === 100 ? "Perfect round. Amazing." : result.percentage >= 70 ? "Look at you go." : "Good work showing up.";
     $("[data-result-title]").textContent = heading;
     $("[data-result-subtitle]").textContent = result.percentage >= 70
@@ -215,6 +238,7 @@
       </article>`;
     }).join("");
     showScreen("results");
+    if (!resultSaved) announce("Your result is shown, but this browser could not save it for later.");
   }
 
   async function loadDefaultQuestions() {
@@ -295,7 +319,18 @@
   });
   $("[data-next]").addEventListener("click", nextQuestion);
   $("[data-retry]").addEventListener("click", startQuiz);
-  $$('[data-home]').forEach((button) => button.addEventListener("click", () => showScreen("home")));
+  $$('[data-home]').forEach((button) => button.addEventListener("click", () => {
+    updateLatestResult();
+    showScreen("home");
+  }));
+  $("[data-clear-latest]").addEventListener("click", () => {
+    if (window.QuizCore.clearLatestResult(getBrowserStorage())) {
+      updateLatestResult();
+      announce("The saved result was cleared from this device.");
+    } else {
+      announce("This browser could not clear the saved result.");
+    }
+  });
   $$('[data-quit]').forEach((button) => button.addEventListener("click", () => {
     if (window.confirm("Exit this quiz? Your answers in this session will be cleared.")) {
       cancelQuestionTimer();
@@ -324,5 +359,6 @@
     }
   });
 
+  updateLatestResult();
   loadDefaultQuestions();
 })();
