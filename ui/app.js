@@ -3,7 +3,7 @@
 (() => {
   const $ = (selector, parent = document) => parent.querySelector(selector);
   const $$ = (selector, parent = document) => [...parent.querySelectorAll(selector)];
-  const state = { questions: [], answers: [], index: 0, selected: null, source: "Sample question bank" };
+  const state = { bankQuestions: [], questions: [], answers: [], index: 0, selected: null, source: "Sample question bank" };
   const screens = $$('[data-screen]');
   let toastTimer;
 
@@ -29,14 +29,37 @@
   }
 
   function updateHome() {
-    const ready = state.questions.length > 0;
+    const ready = state.bankQuestions.length > 0;
+    const countInput = $("[data-question-count]");
+    const available = state.bankQuestions.length;
+    countInput.max = String(Math.max(1, available));
+    const requestedCount = Number(countInput.value);
+    if (!Number.isInteger(requestedCount) || requestedCount < 1 || requestedCount > available) {
+      countInput.value = String(Math.min(5, Math.max(1, available)));
+    }
+    $("[data-setup-help]").textContent = ready
+      ? `Choose 1–${available} from your ${available} loaded questions.`
+      : "Load a question bank to set the quiz length.";
     $("[data-start]").disabled = !ready;
-    $("[data-home-count]").textContent = ready ? state.questions.length : "0";
+    $("[data-home-count]").textContent = ready ? available : "0";
     $("[data-source-name]").textContent = state.source;
   }
 
   function startQuiz() {
-    if (!state.questions.length) return;
+    if (!state.bankQuestions.length) return;
+    const count = Number($("[data-question-count]").value);
+    try {
+      state.questions = window.QuizCore.prepareQuiz(state.bankQuestions, {
+        count,
+        shuffle: $("[data-shuffle]").checked
+      });
+    } catch (error) {
+      const errorBox = $("[data-home-error]");
+      errorBox.textContent = error.message;
+      errorBox.hidden = false;
+      return;
+    }
+    $("[data-home-error]").hidden = true;
     state.answers = Array(state.questions.length).fill(null);
     state.index = 0;
     state.selected = null;
@@ -125,7 +148,7 @@
     try {
       const response = await fetch("/questions.txt");
       if (!response.ok) throw new Error("Sample file could not be loaded.");
-      state.questions = window.QuizCore.parseQuestionBank(await response.text());
+      state.bankQuestions = window.QuizCore.parseQuestionBank(await response.text());
       state.source = "Sample question bank";
       updateHome();
     } catch (error) {
@@ -142,7 +165,7 @@
     errorBox.hidden = true;
     try {
       if (file.size > 5 * 1024 * 1024) throw new Error("Please choose a question file smaller than 5 MB.");
-      state.questions = window.QuizCore.parseQuestionBank(await file.text());
+      state.bankQuestions = window.QuizCore.parseQuestionBank(await file.text());
       state.source = file.name;
       updateHome();
       announce(`${state.questions.length} questions loaded`);
@@ -155,6 +178,19 @@
   });
 
   $("[data-start]").addEventListener("click", startQuiz);
+  $("[data-question-count]").addEventListener("input", () => {
+    const countInput = $("[data-question-count]");
+    const count = Number(countInput.value);
+    const errorBox = $("[data-home-error]");
+    if (!Number.isInteger(count) || count < 1 || count > state.bankQuestions.length) {
+      errorBox.textContent = `Choose a whole number from 1 to ${state.bankQuestions.length}.`;
+      errorBox.hidden = false;
+      $("[data-start]").disabled = true;
+      return;
+    }
+    errorBox.hidden = true;
+    $("[data-start]").disabled = state.bankQuestions.length === 0;
+  });
   $("[data-next]").addEventListener("click", nextQuestion);
   $("[data-retry]").addEventListener("click", startQuiz);
   $$('[data-home]').forEach((button) => button.addEventListener("click", () => showScreen("home")));

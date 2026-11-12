@@ -47,5 +47,29 @@
       percentage: questions.length ? Math.round((correct / questions.length) * 100) : 0 };
   }
 
-  return { parseQuestionBank, scoreQuiz };
+  function prepareQuiz(questions, options = {}) {
+    if (!Array.isArray(questions) || !questions.length) {
+      throw new Error("Load at least one question before starting a quiz.");
+    }
+    const count = options.count === undefined ? questions.length : options.count;
+    if (!Number.isInteger(count) || count < 1 || count > questions.length) {
+      throw new Error(`Choose between 1 and ${questions.length} questions.`);
+    }
+
+    const selected = [...questions];
+    if (options.shuffle) {
+      const random = options.random || Math.random;
+      for (let index = selected.length - 1; index > 0; index -= 1) {
+        const value = random();
+        if (!Number.isFinite(value) || value < 0 || value >= 1) {
+          throw new Error("The shuffle random source must return a value from 0 to less than 1.");
+        }
+        const swapIndex = Math.floor(value * (index + 1));
+        [selected[index], selected[swapIndex]] = [selected[swapIndex], selected[index]];
+      }
+    }
+    return selected.slice(0, count);
+  }
+
+  return { parseQuestionBank, scoreQuiz, prepareQuiz };
 });
