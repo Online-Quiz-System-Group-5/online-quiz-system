@@ -48,7 +48,20 @@ const server = http.createServer((request, response) => {
   });
 });
 
-const port = Number(process.env.PORT || 4173);
-server.listen(port, "127.0.0.1", () => {
-  process.stdout.write(`Quizroom UI ready at http://127.0.0.1:${port}/\n`);
-});
+const requestedPort = Number(process.env.PORT || 4173);
+
+function listen(port) {
+  server.once("error", (error) => {
+    if (error.code === "EADDRINUSE" && !process.env.PORT) {
+      listen(port + 1);
+      return;
+    }
+    throw error;
+  });
+
+  server.listen(port, "127.0.0.1", () => {
+    process.stdout.write(`Quizroom UI ready at http://127.0.0.1:${server.address().port}/\n`);
+  });
+}
+
+listen(requestedPort);
