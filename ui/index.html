@@ -32,6 +32,14 @@
             <p class="eyebrow"><span class="eyebrow-line"></span> GROUP 5 · ONLINE QUIZ SYSTEM</p>
             <h1 id="home-title">A little focus.<br><span>A lot of learning.</span></h1>
             <p class="hero-lede">Take a quick quiz, trust your first thought, and see what you know. Your session stays right here on this device.</p>
+            <div class="quiz-setup" aria-label="Quiz setup">
+              <label class="setup-count" for="question-count">
+                <span>Questions per quiz</span>
+                <input id="question-count" type="number" min="1" value="5" inputmode="numeric" data-question-count aria-describedby="setup-help">
+              </label>
+              <label class="setup-shuffle"><input type="checkbox" data-shuffle> <span>Shuffle question order</span></label>
+            </div>
+            <p class="setup-help" id="setup-help" data-setup-help>Choose how many questions to answer.</p>
             <div class="hero-actions">
               <button class="button button-primary button-large" type="button" data-start disabled>
                 Start quiz <span aria-hidden="true">→</span>

@@ -2,7 +2,7 @@
 
 const test = require("node:test");
 const assert = require("node:assert/strict");
-const { parseQuestionBank, scoreQuiz } = require("./quiz-core.js");
+const { parseQuestionBank, scoreQuiz, prepareQuiz } = require("./quiz-core.js");
 
 test("loads multiple records and converts one-based keys", () => {
   const questions = parseQuestionBank("First?|A|B|2\r\nSecond?|Yes|No|Maybe|1\r\n");
@@ -37,4 +37,30 @@ test("rejects missing and invalid answers", () => {
   const questions = parseQuestionBank("Prompt|a|b|1");
   assert.throws(() => scoreQuiz(questions, []), /one answer for every question/i);
   assert.throws(() => scoreQuiz(questions, [2]), /outside the available options/i);
+});
+
+test("prepares the requested quiz length and keeps answer keys attached", () => {
+  const bank = parseQuestionBank("First|A|B|1\nSecond|C|D|2\nThird|E|F|1");
+  const quiz = prepareQuiz(bank, { count: 2 });
+  assert.equal(quiz.length, 2);
+  assert.deepEqual(quiz, bank.slice(0, 2));
+  assert.deepEqual(prepareQuiz(bank, { count: 1 }), bank.slice(0, 1));
+  assert.deepEqual(prepareQuiz(bank, { count: 3 }), bank);
+  assert.equal(bank.length, 3);
+});
+
+test("shuffles question records before selecting the requested count", () => {
+  const bank = parseQuestionBank("First|A|B|1\nSecond|C|D|2\nThird|E|F|1");
+  const values = [0, 0];
+  const quiz = prepareQuiz(bank, { count: 2, shuffle: true, random: () => values.shift() });
+  assert.deepEqual(quiz.map((question) => question.prompt), ["Second", "Third"]);
+  assert.deepEqual(quiz.map((question) => question.correctOption), [1, 0]);
+  assert.deepEqual(bank.map((question) => question.prompt), ["First", "Second", "Third"]);
+});
+
+test("rejects quiz sizes below one, above the bank, and for an empty bank", () => {
+  const bank = parseQuestionBank("Only|A|B|1");
+  assert.throws(() => prepareQuiz(bank, { count: 0 }), /between 1 and 1/i);
+  assert.throws(() => prepareQuiz(bank, { count: 2 }), /between 1 and 1/i);
+  assert.throws(() => prepareQuiz([], { count: 1 }), /at least one question/i);
 });
