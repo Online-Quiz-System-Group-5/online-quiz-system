@@ -2,7 +2,7 @@
 
 const test = require("node:test");
 const assert = require("node:assert/strict");
-const { parseQuestionBank, inspectQuestionBank, scoreQuiz, prepareQuiz, isTimerExpired, resolveTimedAnswer, createTimerController, saveLatestResult, readLatestResult, clearLatestResult } = require("./quiz-core.js");
+const { parseQuestionBank, inspectQuestionBank, scoreQuiz, getReviewState, prepareQuiz, isTimerExpired, resolveTimedAnswer, createTimerController, saveLatestResult, readLatestResult, clearLatestResult } = require("./quiz-core.js");
 
 test("loads multiple records and converts one-based keys", () => {
   const questions = parseQuestionBank("First?|A|B|2\r\nSecond?|Yes|No|Maybe|1\r\n");
@@ -42,6 +42,14 @@ test("rejects missing and invalid answers", () => {
 test("counts timed-out questions as unanswered without rejecting the full quiz", () => {
   const questions = parseQuestionBank("Prompt|A|B|1");
   assert.deepEqual(scoreQuiz(questions, [null]), { correct: 0, total: 1, incorrect: 1, percentage: 0 });
+});
+
+test("classifies correct, incorrect, and unanswered review entries", () => {
+  const question = parseQuestionBank("Prompt|Right|Wrong|1")[0];
+  assert.equal(getReviewState(question, 0), "correct");
+  assert.equal(getReviewState(question, 1), "incorrect");
+  assert.equal(getReviewState(question, null), "unanswered");
+  assert.throws(() => getReviewState(question, 2), /outside the available options/i);
 });
 
 test("accepts a last-second answer at the deadline and times out after it", () => {

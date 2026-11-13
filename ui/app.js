@@ -227,6 +227,27 @@
     advanceQuestion(state.selected);
   }
 
+  function applyReviewFilter(filter) {
+    const filters = ["all", "incorrect", "unanswered"];
+    if (!filters.includes(filter)) return;
+    let visible = 0;
+    $$("[data-review-state]").forEach((item) => {
+      item.hidden = filter !== "all" && item.dataset.reviewState !== filter;
+      if (!item.hidden) visible += 1;
+    });
+    $$("[data-review-filter]").forEach((button) => {
+      button.setAttribute("aria-pressed", String(button.dataset.reviewFilter === filter));
+    });
+    $("[data-review-count]").textContent = filter === "all"
+      ? `${visible} QUESTIONS`
+      : `${visible} ${filter.toUpperCase()}`;
+    const empty = $("[data-review-empty]");
+    empty.hidden = visible > 0;
+    empty.textContent = filter === "incorrect"
+      ? "No incorrect answers in this attempt."
+      : "No unanswered questions in this attempt.";
+  }
+
   function showResults() {
     cancelQuestionTimer();
     const result = window.QuizCore.scoreQuiz(state.questions, state.answers);
@@ -243,20 +264,26 @@
     $("[data-score-correct]").textContent = result.correct;
     $("[data-score-incorrect]").textContent = result.incorrect;
     $("[data-score-total]").textContent = result.total;
-    $("[data-review-count]").textContent = `${result.total} QUESTIONS`;
     $("[data-score-ring]").style.setProperty("--score", `${result.percentage}%`);
     $("[data-review-list]").innerHTML = state.questions.map((question, index) => {
       const answer = state.answers[index];
-      const right = answer !== null && answer === question.correctOption;
-      return `<article class="review-item ${right ? "review-right" : "review-wrong"}">
-        <span class="review-mark" aria-label="${right ? "Correct" : "Review"}">${right ? "✓" : "↗"}</span>
+      const reviewState = window.QuizCore.getReviewState(question, answer);
+      const right = reviewState === "correct";
+      const status = reviewState === "unanswered" ? "UNANSWERED" : right ? "CORRECT" : "INCORRECT";
+      return `<article class="review-item ${right ? "review-right" : "review-wrong"}" data-review-state="${reviewState}">
+        <span class="review-mark" aria-label="${status}">${right ? "✓" : "↗"}</span>
         <div class="review-content"><span class="review-number">QUESTION ${String(index + 1).padStart(2, "0")}</span>
           <h3>${escapeHTML(question.prompt)}</h3>
           <p>Your answer: <strong>${answer === null ? "Not answered" : escapeHTML(question.options[answer])}</strong></p>
           ${right ? "" : `<p class="correct-answer">Correct answer: <strong>${escapeHTML(question.options[question.correctOption])}</strong></p>`}
-        </div><span class="review-status">${right ? "CORRECT" : "REVIEW"}</span>
+        </div><span class="review-status">${status}</span>
       </article>`;
     }).join("");
+    const reviewStates = state.questions.map((question, index) => window.QuizCore.getReviewState(question, state.answers[index]));
+    $("[data-filter-all-count]").textContent = String(result.total);
+    $("[data-filter-incorrect-count]").textContent = String(reviewStates.filter((value) => value === "incorrect").length);
+    $("[data-filter-unanswered-count]").textContent = String(reviewStates.filter((value) => value === "unanswered").length);
+    applyReviewFilter("all");
     showScreen("results");
     if (!resultSaved || !historySaved) announce("Your result is shown, but this browser could not save all score details for later.");
   }
@@ -338,6 +365,9 @@
     $("[data-start]").disabled = state.bankQuestions.length === 0;
   });
   $("[data-next]").addEventListener("click", nextQuestion);
+  $$("[data-review-filter]").forEach((button) => button.addEventListener("click", () => {
+    applyReviewFilter(button.dataset.reviewFilter);
+  }));
   $("[data-print]").addEventListener("click", () => {
     if (!$("[data-screen='results']").hidden) window.print();
   });

@@ -11,6 +11,7 @@ A local multiple-choice quiz project for Group 5's allocated Problem Statement 1
 - Automatic score calculation without revealing the answer key during the quiz.
 - Local quiz history with the latest 20 score summaries and a clear-history control.
 - Print completed results and answer review, or save them as a PDF using the browser print dialog.
+- Filter answer review to incorrect or unanswered questions.
 - C++ and browser-core unit/integration tests.
 
 ## Question-bank format
@@ -90,4 +91,10 @@ buttons are absent, all answers are readable, and review entries stay together a
 pages. Browser-generated headers and footers can be disabled in the print dialog.
 Native printing from the home screen or during a quiz prints no quiz content.
 
-GitHub Actions builds the C++ app and tests and runs the existing UI core tests on pushes and pull requests. Run the history and print tests with the commands above before requesting review.
+Run the review-filter browser check with Playwright:
+
+```sh
+PLAYWRIGHT_MODULE=/path/to/playwright PLAYWRIGHT_CHANNEL=chrome node ui/review-filters.browser-check.js
+```
+
+GitHub Actions builds the C++ app and tests and runs the existing UI core tests on pushes and pull requests. Run the history, print, and review-filter browser checks with the commands above before requesting review.
