@@ -1,6 +1,7 @@
 # Sprint 2 Acceptance Review
 
-- Review date: 2026-11-10
+- Review date: 2026-11-12
+- Evidence updated: 2026-11-12
 - Reviewer: Maaya
 - SRS version: Baseline v0.2
 - Commit reviewed: Pending final release commit
@@ -16,7 +17,7 @@
 | OQS-F-005 | TC-QUIZ-01 | Quiz session display | PASS | `./quiz_tests` — prompt options are displayed with one-based numbering | |
 | OQS-F-006 | TC-INPUT-01 | Input handler | PASS | `./quiz_tests` — valid choices complete a session after invalid-input retries | |
 | OQS-F-007 | TC-INPUT-02 | Input validation | PASS | `./quiz_tests` — out-of-range answers are rejected and the question is repeated | |
-| OQS-F-008 | TC-INPUT-03 | Input handler / error recovery | PASS | Both suites — malformed, empty, and out-of-range answers are rejected; session recovers | |
+| OQS-F-008 | TC-INPUT-03 | Input handler / error recovery | PASS | Both suites — malformed, empty, decimal, and out-of-range answers are rejected; session recovers | |
 | OQS-F-009 | TC-SCORE-01 | Scoring component | PASS | `./quiz_tests` — mixed correct and incorrect answers produce the expected score | |
 | OQS-F-010 | TC-SCORE-02 | Scoring component | PASS | `./quiz_tests` — all correct answers produce the maximum score | |
 | OQS-F-011 | TC-QUIZ-02 | Quiz session controller | PASS | `./quiz_tests` — every question is presented exactly once in sequence | |
@@ -95,39 +96,62 @@ All test cases displayed in the terminal output passed. The suite covers:
 
 **C++ unit-test result: All displayed test cases PASS.**
 
-## Defects found
+## Additional regression coverage
 
+The following additional cases were also displayed as passing in the executed unit and CLI test suites:
 | Defect | Requirement ID | Description | GitHub issue/PR |
 |---|---|---|---|
 | None identified during executed regression tests | — | No failures were reported by either executed test suite. Untested requirements remain subject to separate verification. | |
 
-## Review summary
+- `TC-LOAD-05` — minimum option count, inclusive answer-key boundaries, malformed records, and invalid option counts.
+- `TC-LOAD-06` — invalid answer-key text, answer-key range errors, incomplete records, and missing data.
+- `TC-UNIT-01` — answer-count mismatch rejection.
+- `TC-INT-01` — valid choices complete a session after invalid-input retries.
+- `TC-INT-02` — complete load, quiz, score, and results flow.
+- `TC-RESULT-04` — zero-score result boundary.
+- `TC-RESULT-05` — inconsistent score totals are rejected.
+- `TC-SCORE-05` — empty scoring input has a safe zero boundary.
+- `TC-SCORE-06` — mixed-answer summary reports consistent correct, incorrect, total, and percentage values.
+- `TC-SCORE-07` — incomplete answer sets, including skipped answers, are rejected.
 
-- Total requirements: 28
-- Requirements checked: 21
-- Passed: 21
-- Failed: 0
-- Not tested: 7
+### CLI integration test results
 
-### Regression execution summary
+| Test case | Behavior checked | Result |
+|---|---|---|
+| TC-RESULT-02 | Replay starts a second quiz | PASS |
+| TC-RESULT-03 | Replay resets the score | PASS |
+| TC-RESULT-05 | Consistent result summary | PASS |
+| TC-UI-01 | Welcome, invalid menu recovery, and exit flow | PASS |
+| TC-INPUT-03 | Invalid answer rejection and session recovery | PASS |
+| TC-REL-01 | EOF during a quiz exits with a clear diagnostic | PASS |
+| TC-LOAD-04 | Malformed question bank fails safely | PASS |
+| TC-INPUT-04 | EOF at menu exits gracefully | PASS |
+| TC-INPUT-05 | EOF during quiz is handled safely | PASS |
 
-| Activity | Result |
-|---|---|
-| Application compilation | PASS |
-| C++ unit-test executable compilation | PASS |
-| C++ unit tests | PASS — all displayed cases |
-| CLI integration tests | PASS — 8 cases, 0 failures |
-| GitHub Actions CI | Pending verification |
-| Working-product acceptance demo | Pending |
-| Release checklist | Pending |
+**CLI integration result: 9 PASS, 0 FAIL.**
 
-### Known limitations and outstanding verification
+### C++ unit test results
 
-1. Performance requirements OQS-NF-001 and OQS-NF-002 require separate timing measurements.
-2. OQS-NF-004 requires a clean-checkout walkthrough of the README instructions.
-3. OQS-NF-005 requires a successful GitHub Actions CI run. The workflow uses `-Werror`, which was not included in the previously recorded local compilation commands.
-4. OQS-SR-001, OQS-SR-002, and OQS-SR-005 require separate security and privacy checks.
-5. The working-product acceptance demonstration must be recorded, covering a complete quiz session, invalid input handling, results, and replay or normal exit.
-6. GitHub Actions must pass before the review PR is approved.
+The `tests/quiz_tests.cpp` executable was compiled and executed successfully.
 
-**Overall assessment:** All 18 functional requirements and the reliability requirement have passed their mapped automated tests. Two security requirements have also passed their mapped checks. The final regression suites reported no failures. Release approval remains pending the seven outstanding requirement checks, CI verification, and the working-product demonstration.
+The strict-build run displayed 45 PASS lines and no failures. The suite covers:
+
+- Question-bank loading and validation.
+- Missing and malformed question-bank data.
+- Answer-option boundaries and invalid input.
+- Quiz flow and question sequencing.
+- Scoring and percentage calculations.
+- Result summaries and replay-state handling.
+- EOF and incomplete-input handling.
+- Answer-key confidentiality checks.
+
+**C++ unit-test result: 45 PASS output lines, 0 failures reported.**
+
+### Strict CI-equivalent build
+
+The following commands were executed successfully:
+
+```bash
+g++ -std=c++17 -Wall -Wextra -Wpedantic -Werror -Iinclude src/main.cpp src/quiz.cpp -o online_quiz
+
+g++ -std=c++17 -Wall -Wextra -Wpedantic -Werror -Iinclude tests/quiz_tests.cpp src/quiz.cpp -o quiz_tests
