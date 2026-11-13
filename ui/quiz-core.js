@@ -5,31 +5,45 @@
   if (typeof module === "object" && module.exports) module.exports = core;
   if (root) root.QuizCore = core;
 })(typeof globalThis !== "undefined" ? globalThis : this, function () {
-  function parseQuestionBank(contents) {
+  function parseQuestionLine(line, lineNumber) {
+    const fields = line.split("|");
+    if (fields.length < 4) {
+      return { error: `Line ${lineNumber}: add a question, at least two options, and the correct option number.` };
+    }
+    const prompt = fields[0].trim();
+    const options = fields.slice(1, -1).map((option) => option.trim());
+    if (!prompt) return { error: `Line ${lineNumber}: the question text is empty.` };
+    const emptyOption = options.findIndex((option) => !option);
+    if (emptyOption !== -1) return { error: `Line ${lineNumber}: option ${emptyOption + 1} is empty.` };
+    const key = fields[fields.length - 1].trim();
+    if (!/^\d+$/.test(key)) return { error: `Line ${lineNumber}: the correct option must be a whole number.` };
+    const correctOption = Number(key);
+    if (!Number.isSafeInteger(correctOption) || correctOption < 1 || correctOption > options.length) {
+      return { error: `Line ${lineNumber}: the correct option must be from 1 to ${options.length}.` };
+    }
+    return { question: { prompt, options, correctOption: correctOption - 1 } };
+  }
+
+  function inspectQuestionBank(contents) {
     if (typeof contents !== "string") throw new TypeError("Question bank must be text.");
     const questions = [];
+    const errors = [];
     contents.split(/\r?\n/).forEach((line, index) => {
       if (!line.trim()) return;
-      const fields = line.split("|");
       const lineNumber = index + 1;
-      if (fields.length < 4) {
-        throw new Error(`Line ${lineNumber}: add a question, at least two options, and the correct option number.`);
-      }
-      const prompt = fields[0].trim();
-      const options = fields.slice(1, -1).map((option) => option.trim());
-      if (!prompt) throw new Error(`Line ${lineNumber}: the question text is empty.`);
-      const emptyOption = options.findIndex((option) => !option);
-      if (emptyOption !== -1) throw new Error(`Line ${lineNumber}: option ${emptyOption + 1} is empty.`);
-      const key = fields[fields.length - 1].trim();
-      if (!/^\d+$/.test(key)) throw new Error(`Line ${lineNumber}: the correct option must be a whole number.`);
-      const correctOption = Number(key);
-      if (!Number.isSafeInteger(correctOption) || correctOption < 1 || correctOption > options.length) {
-        throw new Error(`Line ${lineNumber}: the correct option must be from 1 to ${options.length}.`);
-      }
-      questions.push({ prompt, options, correctOption: correctOption - 1 });
+      const result = parseQuestionLine(line, lineNumber);
+      if (result.error) errors.push({ line: lineNumber, message: result.error });
+      else questions.push(result.question);
     });
-    if (!questions.length) throw new Error("This question bank has no usable questions.");
-    return questions;
+    if (!questions.length && !errors.length) errors.push({ line: null, message: "This question bank has no usable questions." });
+    return { questions, errors };
+  }
+
+  function parseQuestionBank(contents) {
+    const report = inspectQuestionBank(contents);
+    if (report.errors.length) throw new Error(report.errors[0].message);
+    if (!report.questions.length) throw new Error("This question bank has no usable questions.");
+    return report.questions;
   }
 
   function scoreQuiz(questions, answers) {
@@ -71,5 +85,5 @@
     return selected.slice(0, count);
   }
 
-  return { parseQuestionBank, scoreQuiz, prepareQuiz };
+  return { parseQuestionBank, inspectQuestionBank, scoreQuiz, prepareQuiz };
 });

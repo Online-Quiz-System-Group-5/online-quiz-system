@@ -3,7 +3,7 @@
 (() => {
   const $ = (selector, parent = document) => parent.querySelector(selector);
   const $$ = (selector, parent = document) => [...parent.querySelectorAll(selector)];
-  const state = { bankQuestions: [], questions: [], answers: [], index: 0, selected: null, source: "Sample question bank" };
+  const state = { bankQuestions: [], bankErrors: [], questions: [], answers: [], index: 0, selected: null, source: "Sample question bank" };
   const screens = $$('[data-screen]');
   let toastTimer;
 
@@ -43,6 +43,17 @@
     $("[data-start]").disabled = !ready;
     $("[data-home-count]").textContent = ready ? available : "0";
     $("[data-source-name]").textContent = state.source;
+  }
+
+  function renderBankPreview() {
+    $("[data-preview-summary]").textContent = `${state.bankQuestions.length} usable question${state.bankQuestions.length === 1 ? "" : "s"}`;
+    $("[data-preview-questions]").innerHTML = state.bankQuestions.map((question) => `
+      <li>${escapeHTML(question.prompt)}<small>${question.options.length} options</small></li>`).join("");
+    const errors = $("[data-preview-errors]");
+    errors.innerHTML = state.bankErrors.length
+      ? `<h3>Records needing attention</h3><ul>${state.bankErrors.map((error) => `<li>${escapeHTML(error.message)}</li>`).join("")}</ul>`
+      : "";
+    errors.hidden = state.bankErrors.length === 0;
   }
 
   function startQuiz() {
@@ -149,6 +160,7 @@
       const response = await fetch("/questions.txt");
       if (!response.ok) throw new Error("Sample file could not be loaded.");
       state.bankQuestions = window.QuizCore.parseQuestionBank(await response.text());
+      state.bankErrors = [];
       state.source = "Sample question bank";
       updateHome();
     } catch (error) {
@@ -165,10 +177,20 @@
     errorBox.hidden = true;
     try {
       if (file.size > 5 * 1024 * 1024) throw new Error("Please choose a question file smaller than 5 MB.");
-      state.bankQuestions = window.QuizCore.parseQuestionBank(await file.text());
+      const report = window.QuizCore.inspectQuestionBank(await file.text());
+      state.bankQuestions = report.questions;
+      state.bankErrors = report.errors;
       state.source = file.name;
       updateHome();
-      announce(`${state.questions.length} questions loaded`);
+      renderBankPreview();
+      if (report.errors.length) {
+        errorBox.textContent = state.bankQuestions.length
+          ? `${report.errors.length} invalid record${report.errors.length === 1 ? " was" : "s were"} skipped. Open the preview for line details.`
+          : "No usable questions were found. Open the preview to see the line details.";
+        errorBox.hidden = false;
+      } else {
+        announce(`${state.bankQuestions.length} questions loaded`);
+      }
     } catch (error) {
       errorBox.textContent = error.message || "This file could not be read.";
       errorBox.hidden = false;
@@ -178,6 +200,14 @@
   });
 
   $("[data-start]").addEventListener("click", startQuiz);
+  $("[data-preview-toggle]").addEventListener("click", (event) => {
+    const button = event.currentTarget;
+    const panel = $("[data-bank-preview]");
+    panel.hidden = !panel.hidden;
+    button.setAttribute("aria-expanded", String(!panel.hidden));
+    button.textContent = panel.hidden ? "Preview questions" : "Hide preview";
+    renderBankPreview();
+  });
   $("[data-question-count]").addEventListener("input", () => {
     const countInput = $("[data-question-count]");
     const count = Number(countInput.value);
