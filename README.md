@@ -9,6 +9,7 @@ A local multiple-choice quiz project for Group 5's allocated Problem Statement 1
 - Load the sample bank or import another UTF-8 `.txt` question bank.
 - Answer selection by mouse or number keys, progress display, safe exit, and replay.
 - Automatic score calculation without revealing the answer key during the quiz.
+- Local quiz history with the latest 20 score summaries and a clear-history control.
 - C++ and browser-core unit/integration tests.
 
 ## Question-bank format
@@ -61,5 +62,16 @@ Run UI parsing/scoring tests with Node.js:
 ```sh
 node --test ui/quiz-core.test.js
 ```
+
+Run the history unit and browser checks with Node.js and Playwright:
+
+```sh
+node --test ui/history.test.js
+PLAYWRIGHT_MODULE=/path/to/playwright PLAYWRIGHT_CHANNEL=chrome node ui/history.browser-check.js
+```
+
+History uses browser local storage and saves only date, question bank name, score, and
+question count. It does not save questions or answers. Clearing history does not
+clear the separate latest-result card.
 
 GitHub Actions builds the C++ app and tests and runs the UI unit tests on pushes and pull requests.

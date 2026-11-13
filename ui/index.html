@@ -19,6 +19,7 @@
       </a>
       <div class="topbar-right">
         <span class="local-badge"><span class="status-dot"></span> Local session</span>
+        <button class="button button-secondary history-nav" type="button" data-history-open data-history-nav>History</button>
         <button class="icon-button" type="button" aria-label="How it works" data-help-open>
           <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M9.7 9a2.4 2.4 0 1 1 4.1 1.7c-1.1 1-1.8 1.3-1.8 2.8M12 17h.01"></path></svg>
         </button>
@@ -32,6 +33,21 @@
             <p class="eyebrow"><span class="eyebrow-line"></span> GROUP 5 · ONLINE QUIZ SYSTEM</p>
             <h1 id="home-title">A little focus.<br><span>A lot of learning.</span></h1>
             <p class="hero-lede">Take a quick quiz, trust your first thought, and see what you know. Your session stays right here on this device.</p>
+            <div class="quiz-setup" aria-label="Quiz setup">
+              <label class="setup-count" for="question-count">
+                <span>Questions per quiz</span>
+                <input id="question-count" type="number" min="1" value="5" inputmode="numeric" data-question-count aria-describedby="setup-help">
+              </label>
+              <label class="setup-shuffle"><input type="checkbox" data-shuffle> <span>Shuffle question order</span></label>
+            </div>
+            <p class="setup-help" id="setup-help" data-setup-help>Choose how many questions to answer.</p>
+            <div class="timer-setup">
+              <label class="setup-shuffle"><input type="checkbox" data-timer-enabled> <span>Use a per-question timer</span></label>
+              <label class="setup-count timer-length" data-timer-setting hidden for="timer-seconds">
+                <span>Seconds per question</span>
+                <input id="timer-seconds" type="number" min="5" max="120" value="30" inputmode="numeric" data-timer-seconds>
+              </label>
+            </div>
             <div class="hero-actions">
               <button class="button button-primary button-large" type="button" data-start disabled>
                 Start quiz <span aria-hidden="true">→</span>
@@ -42,8 +58,14 @@
               <span class="source-icon" aria-hidden="true">↳</span>
               <span>Question bank: <strong data-source-name>Loading sample questions</strong></span>
               <label class="file-button" for="question-file">Change file</label>
+              <button class="file-button preview-toggle" type="button" data-preview-toggle aria-expanded="false" aria-controls="bank-preview">Preview questions</button>
               <input class="visually-hidden" id="question-file" type="file" accept=".txt,text/plain">
             </div>
+            <section class="bank-preview" id="bank-preview" data-bank-preview aria-labelledby="preview-title" hidden>
+              <div class="preview-heading"><h2 id="preview-title">Question bank preview</h2><span data-preview-summary></span></div>
+              <ol class="preview-questions" data-preview-questions></ol>
+              <div class="preview-errors" data-preview-errors role="alert" hidden></div>
+            </section>
             <p class="inline-error" role="alert" data-home-error hidden></p>
           </div>
           <aside class="hero-art" aria-label="Quiz overview">
@@ -67,6 +89,31 @@
           <div class="how-divider" aria-hidden="true"></div>
           <div class="how-card"><span class="step-number">03</span><div><strong>See your progress</strong><p>Get a score and review at the end.</p></div></div>
         </div>
+        <section class="latest-result" data-latest-result aria-labelledby="latest-result-title" hidden>
+          <div>
+            <p class="eyebrow"><span class="eyebrow-line"></span> SAVED ON THIS DEVICE</p>
+            <h2 id="latest-result-title">Your latest result</h2>
+            <p class="latest-score"><strong data-latest-score></strong><span data-latest-count></span></p>
+            <p class="latest-meta">Question bank: <strong data-latest-bank></strong></p>
+            <p class="latest-meta">Completed <time data-latest-date></time></p>
+          </div>
+          <button class="button button-secondary" type="button" data-clear-latest>Clear saved result</button>
+        </section>
+        <button class="button button-secondary history-home-link" type="button" data-history-open>View quiz history</button>
+      </section>
+
+      <section class="screen history-screen" data-screen="history" aria-labelledby="history-title" hidden>
+        <div class="history-wrap">
+          <button class="text-button" type="button" data-history-back>← Back to home</button>
+          <p class="eyebrow"><span class="eyebrow-line"></span> SAVED ON THIS DEVICE</p>
+          <h1 id="history-title">Quiz history</h1>
+          <p>Recent scores from this browser. Questions and answers are never saved here.</p>
+          <p class="history-message" data-history-warning role="status" hidden></p>
+          <p class="history-message" data-history-empty>No completed quizzes yet.</p>
+          <p class="history-message" data-history-full hidden>Showing your latest 20 results. Older scores are removed as new ones are added.</p>
+          <ol class="history-list" data-history-list></ol>
+          <button class="button button-secondary" type="button" data-history-clear hidden>Clear history</button>
+        </div>
       </section>
 
       <section class="screen quiz-screen" data-screen="quiz" aria-labelledby="quiz-title" hidden>
@@ -75,6 +122,7 @@
             <div class="quiz-heading-row">
               <button class="text-button" type="button" data-quit>← <span>Exit quiz</span></button>
               <span class="quiz-session-label"><span class="status-dot"></span> QUIZ IN PROGRESS</span>
+              <span class="quiz-timer" data-question-timer role="timer" aria-live="polite" hidden><span>TIME LEFT</span><strong data-timer-value>00:30</strong></span>
             </div>
             <div class="progress-row">
               <span class="progress-caption" data-progress-text>QUESTION 1 OF 5</span>
