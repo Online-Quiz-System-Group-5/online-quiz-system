@@ -78,4 +78,4 @@ buttons are absent, all answers are readable, and review entries stay together a
 pages. Browser-generated headers and footers can be disabled in the print dialog.
 Native printing from the home screen or during a quiz prints no quiz content.
 
-GitHub Actions builds the C++ app and tests and runs UI unit and Chromium integration tests on pushes and pull requests.
+GitHub Actions builds the C++ app and tests and runs the existing UI core tests on pushes and pull requests. Run the print tests with the commands above before requesting review.
