@@ -3,8 +3,9 @@
 (() => {
   const $ = (selector, parent = document) => parent.querySelector(selector);
   const $$ = (selector, parent = document) => [...parent.querySelectorAll(selector)];
-  const state = { bankQuestions: [], bankErrors: [], questions: [], answers: [], index: 0, selected: null, source: "Sample question bank" };
+  const state = { bankQuestions: [], bankErrors: [], questions: [], answers: [], index: 0, selected: null, source: "Sample question bank", timerSeconds: 0, timerDeadline: null };
   const screens = $$('[data-screen]');
+  const timerController = window.QuizCore.createTimerController();
   let toastTimer;
 
   function escapeHTML(value) {
@@ -56,8 +57,65 @@
     errors.hidden = state.bankErrors.length === 0;
   }
 
+  function cancelQuestionTimer() {
+    timerController.cancel();
+    state.timerDeadline = null;
+    const timer = $("[data-question-timer]");
+    timer.hidden = true;
+    timer.removeAttribute("data-urgent");
+  }
+
+  function updateQuestionTimer() {
+    if (state.timerDeadline === null) return;
+    const remaining = Math.max(0, Math.ceil((state.timerDeadline - Date.now()) / 1000));
+    const minutes = Math.floor(remaining / 60);
+    const seconds = remaining % 60;
+    $("[data-timer-value]").textContent = `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+    $("[data-question-timer]").setAttribute("data-urgent", String(remaining <= 5));
+    if (window.QuizCore.isTimerExpired(state.timerDeadline, Date.now())) timeoutQuestion();
+  }
+
+  function startQuestionTimer() {
+    cancelQuestionTimer();
+    if (state.timerSeconds <= 0) return;
+    state.timerDeadline = Date.now() + state.timerSeconds * 1000;
+    $("[data-question-timer]").hidden = false;
+    updateQuestionTimer();
+    if (state.timerDeadline !== null) timerController.start(updateQuestionTimer, 200);
+  }
+
+  function advanceQuestion(answer) {
+    state.answers[state.index] = answer;
+    cancelQuestionTimer();
+    if (state.index === state.questions.length - 1) {
+      showResults();
+      return;
+    }
+    state.index += 1;
+    state.selected = null;
+    renderQuestion();
+  }
+
+  function timeoutQuestion() {
+    const deadline = state.timerDeadline;
+    if (deadline === null || !window.QuizCore.isTimerExpired(deadline, Date.now())) return;
+    const answer = state.selected;
+    advanceQuestion(answer);
+    if (answer === null) announce("Time is up. This question was recorded as unanswered.");
+  }
+
   function startQuiz() {
     if (!state.bankQuestions.length) return;
+    const timerEnabled = $("[data-timer-enabled]").checked;
+    const timerSeconds = Number($("[data-timer-seconds]").value);
+    if (timerEnabled && (!Number.isInteger(timerSeconds) || timerSeconds < 5 || timerSeconds > 120)) {
+      const errorBox = $("[data-home-error]");
+      errorBox.textContent = "Choose a timer from 5 to 120 seconds per question.";
+      errorBox.hidden = false;
+      return;
+    }
+    cancelQuestionTimer();
+    state.timerSeconds = timerEnabled ? timerSeconds : 0;
     const count = Number($("[data-question-count]").value);
     try {
       state.questions = window.QuizCore.prepareQuiz(state.bankQuestions, {
@@ -104,9 +162,14 @@
     $$("[data-option]").forEach((button) => {
       button.addEventListener("click", () => selectOption(Number(button.dataset.option)));
     });
+    startQuestionTimer();
   }
 
   function selectOption(index) {
+    if (state.timerDeadline !== null && window.QuizCore.isTimerExpired(state.timerDeadline, Date.now())) {
+      timeoutQuestion();
+      return;
+    }
     state.selected = index;
     $$("[data-option]").forEach((button) => {
       const selected = Number(button.dataset.option) === index;
@@ -118,17 +181,15 @@
 
   function nextQuestion() {
     if (state.selected === null) return;
-    state.answers[state.index] = state.selected;
-    if (state.index === state.questions.length - 1) {
-      showResults();
+    if (state.timerDeadline !== null && window.QuizCore.isTimerExpired(state.timerDeadline, Date.now())) {
+      timeoutQuestion();
       return;
     }
-    state.index += 1;
-    state.selected = null;
-    renderQuestion();
+    advanceQuestion(state.selected);
   }
 
   function showResults() {
+    cancelQuestionTimer();
     const result = window.QuizCore.scoreQuiz(state.questions, state.answers);
     const heading = result.percentage === 100 ? "Perfect round. Amazing." : result.percentage >= 70 ? "Look at you go." : "Good work showing up.";
     $("[data-result-title]").textContent = heading;
@@ -142,12 +203,13 @@
     $("[data-review-count]").textContent = `${result.total} QUESTIONS`;
     $("[data-score-ring]").style.setProperty("--score", `${result.percentage}%`);
     $("[data-review-list]").innerHTML = state.questions.map((question, index) => {
-      const right = state.answers[index] === question.correctOption;
+      const answer = state.answers[index];
+      const right = answer !== null && answer === question.correctOption;
       return `<article class="review-item ${right ? "review-right" : "review-wrong"}">
         <span class="review-mark" aria-label="${right ? "Correct" : "Review"}">${right ? "✓" : "↗"}</span>
         <div class="review-content"><span class="review-number">QUESTION ${String(index + 1).padStart(2, "0")}</span>
           <h3>${escapeHTML(question.prompt)}</h3>
-          <p>Your answer: <strong>${escapeHTML(question.options[state.answers[index]])}</strong></p>
+          <p>Your answer: <strong>${answer === null ? "Not answered" : escapeHTML(question.options[answer])}</strong></p>
           ${right ? "" : `<p class="correct-answer">Correct answer: <strong>${escapeHTML(question.options[question.correctOption])}</strong></p>`}
         </div><span class="review-status">${right ? "CORRECT" : "REVIEW"}</span>
       </article>`;
@@ -200,6 +262,16 @@
   });
 
   $("[data-start]").addEventListener("click", startQuiz);
+  const timerEnabledInput = $("[data-timer-enabled]");
+  const timerSettings = $("[data-timer-setting]");
+  const timerSecondsInput = $("[data-timer-seconds]");
+  timerSettings.hidden = !timerEnabledInput.checked;
+  timerSecondsInput.disabled = !timerEnabledInput.checked;
+  timerEnabledInput.addEventListener("change", () => {
+    timerSettings.hidden = !timerEnabledInput.checked;
+    timerSecondsInput.disabled = !timerEnabledInput.checked;
+    $("[data-home-error]").hidden = true;
+  });
   $("[data-preview-toggle]").addEventListener("click", (event) => {
     const button = event.currentTarget;
     const panel = $("[data-bank-preview]");
@@ -226,6 +298,7 @@
   $$('[data-home]').forEach((button) => button.addEventListener("click", () => showScreen("home")));
   $$('[data-quit]').forEach((button) => button.addEventListener("click", () => {
     if (window.confirm("Exit this quiz? Your answers in this session will be cleared.")) {
+      cancelQuestionTimer();
       state.answers = [];
       state.index = 0;
       state.selected = null;
