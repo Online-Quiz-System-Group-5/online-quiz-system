@@ -92,6 +92,67 @@
   }
 
   const latestResultStorageKey = "quizroom.latest-result.v1";
+  const historyStorageKey = "quizroom.history.v1";
+  const historyLimit = 20;
+
+  function resultMetadata(result, bankLabel, date = new Date()) {
+    if (!result || !Number.isInteger(result.correct) || !Number.isInteger(result.total)
+      || result.total < 1 || result.correct < 0 || result.correct > result.total
+      || !Number.isInteger(result.percentage) || result.percentage < 0 || result.percentage > 100
+      || typeof bankLabel !== "string") return null;
+    const completed = date instanceof Date ? date : new Date(date);
+    if (Number.isNaN(completed.getTime())) return null;
+    return { correct: result.correct, total: result.total, percentage: result.percentage,
+      date: completed.toISOString(), bankLabel: bankLabel.slice(0, 120) };
+  }
+
+  function validHistoryEntry(entry) {
+    return entry && Number.isInteger(entry.correct) && Number.isInteger(entry.total)
+      && entry.total > 0 && entry.correct >= 0 && entry.correct <= entry.total
+      && Number.isInteger(entry.percentage) && entry.percentage >= 0 && entry.percentage <= 100
+      && typeof entry.bankLabel === "string" && typeof entry.date === "string"
+      && !Number.isNaN(Date.parse(entry.date));
+  }
+
+  function readHistory(storage) {
+    if (!storage || typeof storage.getItem !== "function") return { entries: [], status: "unavailable" };
+    try {
+      const raw = storage.getItem(historyStorageKey);
+      if (raw === null) return { entries: [], status: "ok" };
+      const saved = JSON.parse(raw);
+      if (!Array.isArray(saved)) return { entries: [], status: "corrupt" };
+      const entries = saved.filter(validHistoryEntry).slice(0, historyLimit).map((entry) => ({
+        correct: entry.correct, total: entry.total, percentage: entry.percentage,
+        date: entry.date, bankLabel: entry.bankLabel.slice(0, 120)
+      }));
+      return { entries, status: entries.length === saved.length ? "ok" : "corrupt" };
+    } catch {
+      return { entries: [], status: "corrupt" };
+    }
+  }
+
+  function addHistoryEntry(storage, result, bankLabel, date = new Date()) {
+    if (!storage || typeof storage.setItem !== "function") return false;
+    const entry = resultMetadata(result, bankLabel, date);
+    if (!entry) return false;
+    try {
+      const previous = readHistory(storage).entries;
+      storage.setItem(historyStorageKey, JSON.stringify([entry, ...previous].slice(0, historyLimit)));
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  function clearHistory(storage) {
+    if (!storage || typeof storage.removeItem !== "function") return false;
+    try {
+      storage.removeItem(historyStorageKey);
+      return true;
+    } catch {
+      return false;
+    }
+  }
 
   function saveLatestResult(storage, result, bankLabel, date = new Date()) {
     if (!storage || typeof storage.setItem !== "function" || !result
@@ -169,5 +230,6 @@
 
   return { parseQuestionBank, inspectQuestionBank, scoreQuiz, prepareQuiz,
     isTimerExpired, resolveTimedAnswer, createTimerController,
-    saveLatestResult, readLatestResult, clearLatestResult };
+    saveLatestResult, readLatestResult, clearLatestResult,
+    readHistory, addHistoryEntry, clearHistory, historyLimit };
 });

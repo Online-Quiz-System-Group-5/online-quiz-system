@@ -218,6 +218,19 @@ kbd { min-width: 18px; padding: 3px 4px; border: 1px solid #e1e2e9; border-radiu
 
 .site-footer { min-height: 54px; display: flex; align-items: center; justify-content: space-between; border-top: 1px solid rgba(31, 37, 55, .08); color: #9a9fad; font-size: 9px; letter-spacing: .2px; }
 .site-footer span:first-child { font-weight: 800; letter-spacing: 1px; }
+.history-home-link { margin-top: 16px; }
+.history-nav[hidden] { display: none; }
+.history-screen { padding: 52px 0; }
+.history-wrap { max-width: 850px; margin: 0 auto; }
+.history-wrap > .text-button { margin-bottom: 28px; }
+.history-wrap h1 { font-size: clamp(36px, 5vw, 54px); }
+.history-wrap > p:not(.eyebrow) { color: var(--ink-soft); line-height: 1.6; }
+.history-list { list-style: none; padding: 0; display: grid; gap: 12px; }
+.history-entry { display: grid; gap: 7px; padding: 18px 20px; border: 1px solid var(--line); border-radius: 14px; background: #fff; overflow-wrap: anywhere; }
+.history-entry time { color: var(--ink-soft); font-size: 12px; }
+.history-entry strong { font-size: 17px; }
+.history-entry span { color: var(--violet-dark); font-weight: 700; }
+.history-message { padding: 12px 15px; border-radius: 10px; background: var(--violet-soft); }
 .help-dialog { width: min(440px, calc(100% - 32px)); border: 1px solid #e6e7ee; border-radius: 20px; padding: 26px; color: var(--ink); background: #fff; box-shadow: 0 25px 80px rgba(25,30,51,.22); }
 .help-dialog::backdrop { background: rgba(32, 35, 53, .38); backdrop-filter: blur(3px); }
 .dialog-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }

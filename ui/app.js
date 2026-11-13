@@ -18,6 +18,7 @@
     screens.forEach((screen) => {
       screen.hidden = screen.dataset.screen !== name;
     });
+    $("[data-history-nav]").hidden = name === "quiz";
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
@@ -48,6 +49,23 @@
     const date = $("[data-latest-date]");
     date.dateTime = saved.date;
     date.textContent = new Date(saved.date).toLocaleString();
+  }
+
+  function updateHistory() {
+    const history = window.QuizCore.readHistory(getBrowserStorage());
+    $("[data-history-list]").innerHTML = history.entries.map((entry) => `
+      <li class="history-entry"><time datetime="${escapeHTML(entry.date)}">${escapeHTML(new Date(entry.date).toLocaleString())}</time>
+        <strong>${escapeHTML(entry.bankLabel)}</strong>
+        <span>${entry.percentage}% · ${entry.correct} of ${entry.total} correct · ${entry.total} questions</span></li>`).join("");
+    $("[data-history-empty]").hidden = history.entries.length > 0;
+    $("[data-history-full]").hidden = history.entries.length < window.QuizCore.historyLimit;
+    const warning = $("[data-history-warning]");
+    warning.hidden = history.status === "ok";
+    warning.textContent = history.status === "corrupt"
+      ? "Some saved history was damaged. Any valid entries are shown. Clear history to remove damaged data."
+      : "This browser does not allow local storage, so history is unavailable.";
+    $("[data-history-clear]").hidden = history.status === "unavailable"
+      || (history.status === "ok" && history.entries.length === 0);
   }
 
   function updateHome() {
@@ -213,7 +231,9 @@
     cancelQuestionTimer();
     const result = window.QuizCore.scoreQuiz(state.questions, state.answers);
     const resultSaved = window.QuizCore.saveLatestResult(getBrowserStorage(), result, state.source);
+    const historySaved = window.QuizCore.addHistoryEntry(getBrowserStorage(), result, state.source);
     updateLatestResult();
+    updateHistory();
     const heading = result.percentage === 100 ? "Perfect round. Amazing." : result.percentage >= 70 ? "Look at you go." : "Good work showing up.";
     $("[data-result-title]").textContent = heading;
     $("[data-result-subtitle]").textContent = result.percentage >= 70
@@ -238,7 +258,7 @@
       </article>`;
     }).join("");
     showScreen("results");
-    if (!resultSaved) announce("Your result is shown, but this browser could not save it for later.");
+    if (!resultSaved || !historySaved) announce("Your result is shown, but this browser could not save all score details for later.");
   }
 
   async function loadDefaultQuestions() {
@@ -331,6 +351,19 @@
       announce("This browser could not clear the saved result.");
     }
   });
+  $$('[data-history-open]').forEach((button) => button.addEventListener("click", () => {
+    updateHistory();
+    showScreen("history");
+  }));
+  $("[data-history-back]").addEventListener("click", () => showScreen("home"));
+  $("[data-history-clear]").addEventListener("click", () => {
+    if (window.QuizCore.clearHistory(getBrowserStorage())) {
+      updateHistory();
+      announce("Quiz history was cleared from this device.");
+    } else {
+      announce("This browser could not clear quiz history.");
+    }
+  });
   $$('[data-quit]').forEach((button) => button.addEventListener("click", () => {
     if (window.confirm("Exit this quiz? Your answers in this session will be cleared.")) {
       cancelQuestionTimer();
@@ -360,5 +393,6 @@
   });
 
   updateLatestResult();
+  updateHistory();
   loadDefaultQuestions();
 })();
