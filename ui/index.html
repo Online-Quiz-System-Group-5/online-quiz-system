@@ -164,6 +164,12 @@
             <article class="score-card score-total"><span class="score-icon">#</span><span class="score-label">QUESTIONS</span><strong data-score-total>0</strong></article>
           </div>
           <div class="review-heading"><div><p class="eyebrow"><span class="eyebrow-line"></span> ANSWER REVIEW</p><h2>What you answered</h2></div><span class="review-count" data-review-count></span></div>
+          <div class="review-filters" role="group" aria-label="Filter answer review">
+            <button type="button" data-review-filter="all" aria-pressed="true">All <span data-filter-all-count>0</span></button>
+            <button type="button" data-review-filter="incorrect" aria-pressed="false">Incorrect <span data-filter-incorrect-count>0</span></button>
+            <button type="button" data-review-filter="unanswered" aria-pressed="false">Unanswered <span data-filter-unanswered-count>0</span></button>
+          </div>
+          <p class="review-empty" data-review-empty role="status" hidden></p>
           <div class="review-list" data-review-list></div>
           <div class="results-actions"><button class="button button-secondary button-large" type="button" data-print>Print results / Save PDF</button><button class="button button-primary button-large" type="button" data-retry>Try again <span aria-hidden="true">↻</span></button><button class="button button-secondary button-large" type="button" data-home>Back to home</button></div>
         </div>

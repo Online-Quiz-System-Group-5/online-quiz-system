@@ -62,6 +62,19 @@
       percentage: questions.length ? Math.round((correct / questions.length) * 100) : 0 };
   }
 
+  function getReviewState(question, answer) {
+    if (!question || !Array.isArray(question.options)
+      || !Number.isInteger(question.correctOption)
+      || question.correctOption < 0 || question.correctOption >= question.options.length) {
+      throw new Error("A valid question is required for review.");
+    }
+    if (answer === null) return "unanswered";
+    if (!Number.isInteger(answer) || answer < 0 || answer >= question.options.length) {
+      throw new Error("The reviewed answer is outside the available options.");
+    }
+    return answer === question.correctOption ? "correct" : "incorrect";
+  }
+
   function isTimerExpired(deadline, now = Date.now()) {
     return Number.isFinite(deadline) && Number.isFinite(now) && now > deadline;
   }
@@ -228,7 +241,7 @@
     return selected.slice(0, count);
   }
 
-  return { parseQuestionBank, inspectQuestionBank, scoreQuiz, prepareQuiz,
+  return { parseQuestionBank, inspectQuestionBank, scoreQuiz, getReviewState, prepareQuiz,
     isTimerExpired, resolveTimedAnswer, createTimerController,
     saveLatestResult, readLatestResult, clearLatestResult,
     readHistory, addHistoryEntry, clearHistory, historyLimit };

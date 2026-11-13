@@ -201,7 +201,15 @@ kbd { min-width: 18px; padding: 3px 4px; border: 1px solid #e1e2e9; border-radiu
 .review-heading .eyebrow { margin: 0 0 7px; }
 .review-heading h2 { margin: 0; font-size: 22px; letter-spacing: -.8px; }
 .review-count { color: #9ba0ae; font-size: 8px; font-weight: 800; letter-spacing: 1px; }
+.review-filters { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 14px; }
+.review-filters button { padding: 8px 12px; border: 1px solid #dedfeb; border-radius: 999px; color: var(--ink-soft); background: #fff; font: 700 10px/1 'Segoe UI Variable', 'Segoe UI', sans-serif; cursor: pointer; }
+.review-filters button[aria-pressed="true"] { border-color: var(--violet); color: #fff; background: var(--violet); }
+.review-filters button:focus-visible { outline: 3px solid rgba(105,88,232,.3); outline-offset: 2px; }
+.review-filters button span { display: inline-block; min-width: 16px; margin-left: 5px; padding: 3px 5px; border-radius: 999px; color: inherit; background: rgba(105,88,232,.1); }
+.review-filters button[aria-pressed="true"] span { background: rgba(255,255,255,.2); }
+.review-empty { margin: 0 0 14px; padding: 18px; border: 1px dashed #d9d6ec; border-radius: 13px; color: var(--ink-soft); text-align: center; background: #fff; }
 .review-list { display: grid; gap: 9px; }
+.review-item[hidden] { display: none; }
 .review-item { display: grid; grid-template-columns: 34px 1fr auto; align-items: start; gap: 12px; padding: 15px 16px; border: 1px solid #e9eaf0; border-radius: 13px; background: #fff; }
 .review-mark { width: 28px; height: 28px; display: grid; place-items: center; border-radius: 9px; font-size: 12px; font-weight: 800; }
 .review-right .review-mark { color: #24866a; background: #e5f7f1; }
@@ -320,7 +328,7 @@ kbd { min-width: 18px; padding: 3px 4px; border: 1px solid #e1e2e9; border-radiu
   :root { color: #000; background: #fff; }
   body { min-width: 0; background: #fff; }
   .app-shell { display: block; max-width: none; min-height: 0; padding: 0; }
-  .topbar, .site-footer, .help-dialog, .toast,
+  .topbar, .site-footer, .help-dialog, .toast, .review-filters,
   .screen:not([data-screen="results"]), .results-actions { display: none !important; }
   .results-screen { padding: 0; }
   .results-wrap { max-width: none; }
