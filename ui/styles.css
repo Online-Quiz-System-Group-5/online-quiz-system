@@ -266,3 +266,207 @@ kbd { min-width: 18px; padding: 3px 4px; border: 1px solid #e1e2e9; border-radiu
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
 }
+/* =====================================
+   HIGH CONTRAST THEME - UI-12
+===================================== */
+
+.theme-toggle {
+  min-height: 38px;
+  padding: 0 13px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.theme-toggle:hover {
+  border-color: var(--violet);
+  background: var(--violet-soft);
+}
+
+.theme-toggle:focus-visible {
+  outline: 3px solid #ffbf00;
+  outline-offset: 4px;
+}
+
+/* High contrast color palette */
+
+:root[data-theme="high-contrast"] {
+  color-scheme: dark;
+  --ink: #ffffff;
+  --ink-soft: #ffffff;
+  --muted: #ffffff;
+  --line: #ffffff;
+  --paper: #000000;
+  --white: #000000;
+  --violet: #ffff00;
+  --violet-dark: #ffff00;
+  --violet-soft: #242424;
+  --mint: #00ffff;
+  --coral: #ffff00;
+  --shadow: none;
+
+  background: #000000;
+  color: #ffffff;
+}
+
+:root[data-theme="high-contrast"] body,
+:root[data-theme="high-contrast"] .app-shell {
+  background: #000000;
+  color: #ffffff;
+}
+
+:root[data-theme="high-contrast"] h1,
+:root[data-theme="high-contrast"] h2,
+:root[data-theme="high-contrast"] h3,
+:root[data-theme="high-contrast"] p,
+:root[data-theme="high-contrast"] span,
+:root[data-theme="high-contrast"] strong,
+:root[data-theme="high-contrast"] label,
+:root[data-theme="high-contrast"] .brand,
+:root[data-theme="high-contrast"] .text-button,
+:root[data-theme="high-contrast"] .option-text,
+:root[data-theme="high-contrast"] .question-meta,
+:root[data-theme="high-contrast"] .keyboard-hint,
+:root[data-theme="high-contrast"] .side-copy,
+:root[data-theme="high-contrast"] .review-content p {
+  color: #ffffff;
+}
+
+:root[data-theme="high-contrast"] .brand-dot,
+:root[data-theme="high-contrast"] .hero-copy h1 span,
+:root[data-theme="high-contrast"] .question-index,
+:root[data-theme="high-contrast"] .progress-percent {
+  color: #ffff00;
+}
+
+:root[data-theme="high-contrast"] .topbar,
+:root[data-theme="high-contrast"] .site-footer,
+:root[data-theme="high-contrast"] .quiz-side {
+  border-color: #ffffff;
+}
+
+:root[data-theme="high-contrast"] .question-card,
+:root[data-theme="high-contrast"] .score-card,
+:root[data-theme="high-contrast"] .review-item,
+:root[data-theme="high-contrast"] .side-stat,
+:root[data-theme="high-contrast"] .art-card-main,
+:root[data-theme="high-contrast"] .home-bottom,
+:root[data-theme="high-contrast"] .help-dialog {
+  background: #000000;
+  color: #ffffff;
+  border: 1px solid #ffffff;
+  box-shadow: none;
+}
+
+:root[data-theme="high-contrast"] .answer-option {
+  background: #000000;
+  color: #ffffff;
+  border: 2px solid #ffffff;
+}
+
+:root[data-theme="high-contrast"] .answer-option:hover,
+:root[data-theme="high-contrast"] .answer-option.selected {
+  background: #242424;
+  border: 2px solid #ffff00;
+}
+
+:root[data-theme="high-contrast"] .option-key {
+  background: #000000;
+  color: #ffffff;
+  border-color: #ffffff;
+}
+
+:root[data-theme="high-contrast"] .selected .option-key {
+  background: #ffff00;
+  color: #000000;
+  border-color: #ffff00;
+}
+
+:root[data-theme="high-contrast"] .button-primary {
+  background: #ffff00;
+  color: #000000;
+  border: 2px solid #ffff00;
+  box-shadow: none;
+}
+
+:root[data-theme="high-contrast"] .button-primary:hover:not(:disabled) {
+  background: #ffffff;
+  color: #000000;
+}
+
+:root[data-theme="high-contrast"] .button-secondary,
+:root[data-theme="high-contrast"] .theme-toggle,
+:root[data-theme="high-contrast"] .icon-button {
+  background: #000000;
+  color: #ffffff;
+  border: 2px solid #ffffff;
+}
+
+:root[data-theme="high-contrast"] .button-secondary:hover,
+:root[data-theme="high-contrast"] .theme-toggle:hover,
+:root[data-theme="high-contrast"] .icon-button:hover {
+  background: #242424;
+  border-color: #ffff00;
+}
+
+:root[data-theme="high-contrast"] .progress-track,
+:root[data-theme="high-contrast"] .art-progress {
+  background: #ffffff;
+}
+
+:root[data-theme="high-contrast"] .progress-track span,
+:root[data-theme="high-contrast"] .art-progress span {
+  background: #ffff00;
+}
+
+:root[data-theme="high-contrast"] .score-ring::before {
+  background: #000000;
+}
+
+:root[data-theme="high-contrast"] .score-ring {
+  background: conic-gradient(#ffff00 var(--score), #ffffff var(--score));
+}
+
+:root[data-theme="high-contrast"] .art-card-back,
+:root[data-theme="high-contrast"] .brand-mark,
+:root[data-theme="high-contrast"] .mini-logo {
+  background: #ffff00;
+  color: #000000;
+}
+
+:root[data-theme="high-contrast"] .art-question-mark,
+:root[data-theme="high-contrast"] .step-number,
+:root[data-theme="high-contrast"] .art-chip {
+  background: #242424;
+  color: #ffff00;
+  border: 1px solid #ffff00;
+}
+
+:root[data-theme="high-contrast"] .art-sticker {
+  background: #ffff00;
+  color: #000000;
+}
+
+:root[data-theme="high-contrast"] .help-dialog::backdrop {
+  background: rgba(0, 0, 0, .9);
+}
+
+:root[data-theme="high-contrast"] :focus-visible {
+  outline: 3px solid #ffff00;
+  outline-offset: 4px;
+}
+
+:root[data-theme="high-contrast"] button:disabled {
+  opacity: .65;
+}
+
+@media (max-width: 430px) {
+  .theme-toggle {
+    padding: 0 8px;
+    font-size: 10px;
+  }
+}

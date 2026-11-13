@@ -27,6 +27,69 @@
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => { toast.hidden = true; }, 2600);
   }
+  // UI-12: High contrast theme management
+
+const THEME_KEY = "quizroom-theme";
+const themeToggle = $("[data-theme-toggle]");
+
+function applyTheme(theme, save = true) {
+  const highContrast = theme === "high-contrast";
+
+  document.documentElement.dataset.theme =
+    highContrast ? "high-contrast" : "standard";
+
+  themeToggle.setAttribute("aria-pressed", String(highContrast));
+
+  themeToggle.setAttribute(
+    "aria-label",
+    highContrast
+      ? "Disable high contrast theme"
+      : "Enable high contrast theme"
+  );
+
+  themeToggle.textContent = highContrast
+    ? "Standard theme"
+    : "High contrast";
+
+  if (save) {
+    try {
+      localStorage.setItem(
+        THEME_KEY,
+        highContrast ? "high-contrast" : "standard"
+      );
+    } catch (error) {
+      console.warn("Could not save theme preference:", error);
+    }
+  }
+}
+
+// Restore previously selected theme
+let savedTheme = "standard";
+
+try {
+  savedTheme = localStorage.getItem(THEME_KEY) || "standard";
+} catch (error) {
+  console.warn("Could not read saved theme:", error);
+}
+
+applyTheme(savedTheme, false);
+
+// Toggle theme on button click
+themeToggle.addEventListener("click", () => {
+  const currentTheme = document.documentElement.dataset.theme;
+
+  const nextTheme =
+    currentTheme === "high-contrast"
+      ? "standard"
+      : "high-contrast";
+
+  applyTheme(nextTheme);
+  announce(
+    nextTheme === "high-contrast"
+      ? "High contrast theme enabled"
+      : "Standard theme enabled"
+  );
+});
 
   function updateHome() {
     const ready = state.questions.length > 0;
