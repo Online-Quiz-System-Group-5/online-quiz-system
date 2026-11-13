@@ -156,6 +156,9 @@
 
   $("[data-start]").addEventListener("click", startQuiz);
   $("[data-next]").addEventListener("click", nextQuestion);
+  $("[data-print]").addEventListener("click", () => {
+    if (!$("[data-screen='results']").hidden) window.print();
+  });
   $("[data-retry]").addEventListener("click", startQuiz);
   $$('[data-home]').forEach((button) => button.addEventListener("click", () => showScreen("home")));
   $$('[data-quit]').forEach((button) => button.addEventListener("click", () => {

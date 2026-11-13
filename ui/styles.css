@@ -266,3 +266,40 @@ kbd { min-width: 18px; padding: 3px 4px; border: 1px solid #e1e2e9; border-radiu
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
 }
+
+/* Keep native browser printing limited to the visible, completed attempt. */
+@page { margin: 15mm; }
+@media print {
+  :root { color: #000; background: #fff; }
+  body { min-width: 0; background: #fff; }
+  .app-shell { display: block; max-width: none; min-height: 0; padding: 0; }
+  .topbar, .site-footer, .help-dialog, .toast,
+  .screen:not([data-screen="results"]), .results-actions { display: none !important; }
+  .results-screen { padding: 0; }
+  .results-wrap { max-width: none; }
+  .results-wrap * { color: #000 !important; background: transparent !important; box-shadow: none !important; }
+  .results-heading, .score-cards { break-inside: avoid; page-break-inside: avoid; }
+  .results-heading h1 { font-size: 24pt; letter-spacing: normal; }
+  .results-heading p { font-size: 11pt; }
+  .score-ring { width: auto; height: auto; border-radius: 0; }
+  .score-ring::before { display: none; }
+  .score-ring strong { font-size: 22pt; }
+  .score-ring span, .score-label { font-size: 9pt; }
+  .score-cards { margin: 16pt 0; }
+  .score-card { min-height: 0; border: 1px solid #777; border-radius: 0; }
+  .score-icon, .eyebrow-line, .review-mark { display: none; }
+  .score-label { position: static; display: block; }
+  .score-card strong { margin-top: 6pt; }
+  .review-heading { break-after: avoid; page-break-after: avoid; }
+  .review-list { display: block; }
+  .review-item {
+    display: block; margin-bottom: 10pt; padding: 10pt;
+    border: 1px solid #777; border-radius: 0;
+    break-inside: avoid; page-break-inside: avoid;
+    overflow-wrap: anywhere;
+  }
+  .review-content h3 { font-size: 12pt; }
+  .review-content p { font-size: 11pt; orphans: 3; widows: 3; }
+  .review-number, .review-count, .review-status { font-size: 9pt; }
+  .review-status { display: block; margin-top: 6pt; }
+}

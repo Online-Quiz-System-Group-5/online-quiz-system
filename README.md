@@ -9,6 +9,7 @@ A local multiple-choice quiz project for Group 5's allocated Problem Statement 1
 - Load the sample bank or import another UTF-8 `.txt` question bank.
 - Answer selection by mouse or number keys, progress display, safe exit, and replay.
 - Automatic score calculation without revealing the answer key during the quiz.
+- Print completed results and answer review, or save them as a PDF using the browser print dialog.
 - C++ and browser-core unit/integration tests.
 
 ## Question-bank format
@@ -59,7 +60,22 @@ bash tests/cli_tests.sh
 Run UI parsing/scoring tests with Node.js:
 
 ```sh
-node --test ui/quiz-core.test.js
+node --test ui/*.test.js
 ```
 
-GitHub Actions builds the C++ app and tests and runs the UI unit tests on pushes and pull requests.
+Check printing in Chromium (requires Playwright test tooling):
+
+```sh
+npm install --prefix /tmp/quiz-browser-tools --no-save --package-lock=false playwright@1.64.1
+/tmp/quiz-browser-tools/node_modules/.bin/playwright install chromium
+PLAYWRIGHT_MODULE=/tmp/quiz-browser-tools/node_modules/playwright node ui/print.browser-check.js
+```
+
+The browser check completes a mixed-score quiz, verifies print-only results and review,
+and writes A4 and Letter PDFs to the system temporary directory. To inspect manually,
+complete a quiz and choose **Print results / Save PDF**. Check that navigation and
+buttons are absent, all answers are readable, and review entries stay together across
+pages. Browser-generated headers and footers can be disabled in the print dialog.
+Native printing from the home screen or during a quiz prints no quiz content.
+
+GitHub Actions builds the C++ app and tests and runs UI unit and Chromium integration tests on pushes and pull requests.
