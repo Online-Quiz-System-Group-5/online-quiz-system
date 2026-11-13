@@ -27,6 +27,7 @@ const os = require("node:os");
     await page.emulateMedia({ media: "print" });
     assert.equal(await page.locator("[data-screen]:visible").count(), 0);
     await page.emulateMedia({ media: "screen" });
+    await page.locator("[data-question-count]").fill("30");
     await page.locator("[data-start]").click();
     for (let index = 0; index < 30; index++) {
       await page.locator(`[data-option="${index % 2}"]`).click();

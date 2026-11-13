@@ -9,6 +9,7 @@ A local multiple-choice quiz project for Group 5's allocated Problem Statement 1
 - Load the sample bank or import another UTF-8 `.txt` question bank.
 - Answer selection by mouse or number keys, progress display, safe exit, and replay.
 - Automatic score calculation without revealing the answer key during the quiz.
+- Local quiz history with the latest 20 score summaries and a clear-history control.
 - Print completed results and answer review, or save them as a PDF using the browser print dialog.
 - C++ and browser-core unit/integration tests.
 
@@ -63,6 +64,17 @@ Run UI parsing/scoring tests with Node.js:
 node --test ui/*.test.js
 ```
 
+Run the history unit and browser checks with Node.js and Playwright:
+
+```sh
+node --test ui/history.test.js
+PLAYWRIGHT_MODULE=/path/to/playwright PLAYWRIGHT_CHANNEL=chrome node ui/history.browser-check.js
+```
+
+History uses browser local storage and saves only date, question bank name, score, and
+question count. It does not save questions or answers. Clearing history does not
+clear the separate latest-result card.
+
 Check printing in Chromium (requires Playwright test tooling):
 
 ```sh
@@ -78,4 +90,4 @@ buttons are absent, all answers are readable, and review entries stay together a
 pages. Browser-generated headers and footers can be disabled in the print dialog.
 Native printing from the home screen or during a quiz prints no quiz content.
 
-GitHub Actions builds the C++ app and tests and runs the existing UI core tests on pushes and pull requests. Run the print tests with the commands above before requesting review.
+GitHub Actions builds the C++ app and tests and runs the existing UI core tests on pushes and pull requests. Run the history and print tests with the commands above before requesting review.

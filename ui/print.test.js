@@ -14,11 +14,11 @@ function loadApp() {
       hidden: selector === "[data-screen='results']",
       dataset: {}, style: { setProperty() {} },
       addEventListener(event, handler) { this[event] = handler; },
-      setAttribute() {}, classList: { toggle() {} }
+      setAttribute() {}, removeAttribute() {}, classList: { toggle() {} }
     });
     return elements.get(selector);
   };
-  const screens = ["home", "quiz", "results"].map((name) => {
+  const screens = ["home", "quiz", "results", "history"].map((name) => {
     const screen = get(`[data-screen='${name}']`);
     screen.dataset.screen = name;
     return screen;
