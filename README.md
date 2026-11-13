@@ -65,6 +65,18 @@ Run UI parsing/scoring tests with Node.js:
 node --test ui/*.test.js
 ```
 
+Install the pinned browser-test dependency and run the full browser journey:
+
+```sh
+npm ci
+npx playwright install chromium
+npm run test:browser
+```
+
+The browser suite starts the local UI server automatically and verifies question-bank
+import, invalid-input recovery, quiz start and answers, scoring, answer review, and replay.
+CI installs the same locked dependency and runs the suite in Chromium.
+
 Run the history unit and browser checks with Node.js and Playwright:
 
 ```sh

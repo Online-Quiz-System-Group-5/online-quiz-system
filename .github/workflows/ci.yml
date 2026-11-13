@@ -22,5 +22,16 @@ jobs:
         run: ./quiz_tests
       - name: Run CLI integration tests
         run: bash tests/cli_tests.sh
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install web test dependencies
+        run: npm ci
       - name: Run web UI unit tests
-        run: node --test ui/quiz-core.test.js
+        run: npm run test:unit
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Run browser integration tests
+        run: npm run test:browser
