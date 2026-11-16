@@ -177,6 +177,12 @@
 
   function renderQuestion() {
     const question = state.questions[state.index];
+    const optionCount = question.options.length;
+
+$("[data-keyboard-hint]").innerHTML =
+  optionCount === 1
+    ? `<kbd>1</kbd> to choose`
+    : `<kbd>1</kbd>–<kbd>${optionCount}</kbd> to choose`;
     const count = state.questions.length;
     const number = state.index + 1;
     const percentage = Math.round((number / count) * 100);
