@@ -210,7 +210,8 @@ $("[data-keyboard-hint]").innerHTML =
     });
     startQuestionTimer();
     if (focusPrompt) {
-      $("[data-question-prompt]").focus();
+      const prompt = $("[data-question-prompt]");
+      prompt?.focus?.();
     }
   }
 
