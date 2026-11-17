@@ -2,7 +2,7 @@
 
 const test = require("node:test");
 const assert = require("node:assert/strict");
-const { parseQuestionBank, inspectQuestionBank, scoreQuiz, prepareQuiz, isTimerExpired, resolveTimedAnswer, createTimerController } = require("./quiz-core.js");
+const { parseQuestionBank, inspectQuestionBank, scoreQuiz, prepareQuiz, isTimerExpired, resolveTimedAnswer, createTimerController, saveLatestResult, readLatestResult, clearLatestResult } = require("./quiz-core.js");
 
 test("loads multiple records and converts one-based keys", () => {
   const questions = parseQuestionBank("First?|A|B|2\r\nSecond?|Yes|No|Maybe|1\r\n");
@@ -64,6 +64,34 @@ test("cancels a running question timer when the quiz exits", () => {
   timer.cancel();
   assert.equal(cleared, handle);
   assert.equal(timer.active, false);
+});
+
+test("stores only latest score metadata and can clear it", () => {
+  const values = new Map();
+  const storage = {
+    setItem: (key, value) => values.set(key, value),
+    getItem: (key) => values.get(key) ?? null,
+    removeItem: (key) => values.delete(key)
+  };
+  assert.equal(saveLatestResult(storage, { correct: 2, total: 3, percentage: 67 }, "Sample bank", new Date("2026-11-12T12:00:00Z")), true);
+  const raw = JSON.parse(values.values().next().value);
+  assert.deepEqual(Object.keys(raw).sort(), ["bankLabel", "correct", "date", "percentage", "total"]);
+  assert.deepEqual(readLatestResult(storage), {
+    correct: 2,
+    total: 3,
+    percentage: 67,
+    date: "2026-11-12T12:00:00.000Z",
+    bankLabel: "Sample bank"
+  });
+  assert.equal(clearLatestResult(storage), true);
+  assert.equal(readLatestResult(storage), null);
+});
+
+test("handles corrupted or unavailable result storage safely", () => {
+  const storage = { getItem: () => "not-json", setItem: () => { throw new Error("blocked"); } };
+  assert.equal(readLatestResult(storage), null);
+  assert.equal(readLatestResult(null), null);
+  assert.equal(saveLatestResult(storage, { correct: 1, total: 1, percentage: 100 }, "Bank"), false);
 });
 
 test("prepares the requested quiz length and keeps answer keys attached", () => {

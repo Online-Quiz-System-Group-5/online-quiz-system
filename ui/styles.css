@@ -119,6 +119,13 @@ h1, h2 { font-family: 'Segoe UI Variable Display', 'Segoe UI', Arial, sans-serif
 .how-card strong { font: 700 12px 'Manrope', sans-serif; }
 .how-card p { margin: 5px 0 0; color: var(--muted); font-size: 10px; line-height: 1.4; }
 .how-divider { height: 35px; width: 1px; background: #e5e6ed; }
+.latest-result { display: flex; align-items: center; justify-content: space-between; gap: 22px; margin-top: 15px; padding: 20px 24px; border: 1px solid #e8e5f5; border-radius: 16px; background: #fff; }
+.latest-result .eyebrow { margin: 0 0 8px; font-size: 8px; }
+.latest-result h2 { margin: 0; font-size: 18px; letter-spacing: -.5px; }
+.latest-score { display: flex; align-items: baseline; gap: 10px; margin: 7px 0; color: var(--ink-soft); font-size: 11px; }
+.latest-score strong { color: var(--violet-dark); font: 800 22px/1 'Segoe UI Variable Display', 'Segoe UI', sans-serif; }
+.latest-meta { margin: 4px 0 0; color: var(--muted); font-size: 10px; }
+.latest-meta strong { color: var(--ink-soft); font-weight: 600; }
 
 .quiz-screen { padding: 48px 0 48px; }
 .quiz-layout { display: grid; grid-template-columns: minmax(0, 1fr) 250px; gap: 8%; max-width: 1050px; margin: 0 auto; }
@@ -239,6 +246,7 @@ kbd { min-width: 18px; padding: 3px 4px; border: 1px solid #e1e2e9; border-radiu
   .hero-lede { max-width: 520px; }
   .hero-art { min-height: 320px; max-width: 440px; margin: 16px auto 0; transform: scale(.9); }
   .home-bottom { display: grid; grid-template-columns: 1fr; gap: 14px; padding: 18px; }
+  .latest-result { align-items: flex-start; flex-direction: column; padding: 17px; }
   .how-divider { height: 1px; width: 100%; }
   .how-card p { font-size: 11px; }
   .quiz-screen { padding: 30px 0; }

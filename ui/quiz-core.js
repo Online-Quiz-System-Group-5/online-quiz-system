@@ -91,6 +91,58 @@
     };
   }
 
+  const latestResultStorageKey = "quizroom.latest-result.v1";
+
+  function saveLatestResult(storage, result, bankLabel, date = new Date()) {
+    if (!storage || typeof storage.setItem !== "function" || !result
+      || !Number.isInteger(result.correct) || !Number.isInteger(result.total)
+      || !Number.isInteger(result.percentage) || typeof bankLabel !== "string") return false;
+    const resultDate = date instanceof Date ? date : new Date(date);
+    if (Number.isNaN(resultDate.getTime())) return false;
+    const summary = {
+      correct: result.correct,
+      total: result.total,
+      percentage: result.percentage,
+      date: resultDate.toISOString(),
+      bankLabel: bankLabel.slice(0, 120)
+    };
+    try {
+      storage.setItem(latestResultStorageKey, JSON.stringify(summary));
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  function readLatestResult(storage) {
+    if (!storage || typeof storage.getItem !== "function") return null;
+    try {
+      const saved = JSON.parse(storage.getItem(latestResultStorageKey));
+      if (!saved || !Number.isInteger(saved.correct) || !Number.isInteger(saved.total)
+        || !Number.isInteger(saved.percentage) || typeof saved.bankLabel !== "string"
+        || typeof saved.date !== "string" || Number.isNaN(Date.parse(saved.date))) return null;
+      return {
+        correct: saved.correct,
+        total: saved.total,
+        percentage: saved.percentage,
+        date: saved.date,
+        bankLabel: saved.bankLabel.slice(0, 120)
+      };
+    } catch {
+      return null;
+    }
+  }
+
+  function clearLatestResult(storage) {
+    if (!storage || typeof storage.removeItem !== "function") return false;
+    try {
+      storage.removeItem(latestResultStorageKey);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
   function prepareQuiz(questions, options = {}) {
     if (!Array.isArray(questions) || !questions.length) {
       throw new Error("Load at least one question before starting a quiz.");
@@ -116,5 +168,6 @@
   }
 
   return { parseQuestionBank, inspectQuestionBank, scoreQuiz, prepareQuiz,
-    isTimerExpired, resolveTimedAnswer, createTimerController };
+    isTimerExpired, resolveTimedAnswer, createTimerController,
+    saveLatestResult, readLatestResult, clearLatestResult };
 });
