@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "test:unit": "node --test ui/*.test.js",
+    "test:unit": "node --test ui/*.test.js server/*.test.js",
     "test:browser": "playwright test",
     "test": "npm run test:unit && npm run test:browser"
   },

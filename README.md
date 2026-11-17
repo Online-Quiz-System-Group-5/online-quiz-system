@@ -5,6 +5,7 @@ A local multiple-choice quiz project for Group 5's allocated Problem Statement 1
 ## Features
 
 - C++17 command-line quiz with question-bank validation and replay.
+- Local account registration, sign-in/out, and session-protected profiles.
 - Responsive browser UI with welcome, quiz, result, answer-review, and help screens.
 - Load the sample bank or import another UTF-8 `.txt` question bank.
 - Answer selection by mouse or number keys, progress display, safe exit, and replay.
@@ -60,7 +61,58 @@ Requires Node.js 18 or later. From the repository root:
 node ui/server.js
 ```
 
-Open <http://127.0.0.1:4173/>. The server binds only to the local computer, serves the UI files, and provides the existing sample bank at `/questions.txt`. Imported question banks and answers remain in the browser session; the UI has no account or remote service.
+Open <http://127.0.0.1:4173/>. The server binds only to the local computer, serves the UI files, and provides the existing sample bank at `/questions.txt`. Imported question banks and answers remain in the browser session. Accounts and sessions are stored by the local Node server; no remote identity service is required.
+
+## Accounts and profiles (issue #72)
+
+Use **Sign in → Create an account** to register a display name, email address,
+and password. Passwords must contain 15–128 characters; spaces and passphrases
+are supported. Registration signs the user in. **My profile** shows only the
+session owner's name, email, and registration date; **Sign out** revokes that
+session. `/profile` redirects guests to sign-in. Quiz-taking remains available
+to guests.
+
+Accounts and sessions persist across refreshes and server restarts in
+`.quiz-data/accounts.json`, outside the public UI folder and ignored by Git.
+The directory uses owner-only permissions and account files are written
+atomically with mode 0600. Run **one server process per data directory**; this
+small local JSON store is not a multi-process database. Back up this private
+folder to retain accounts. If it is unreadable, the server refuses to start
+rather than overwriting it.
+
+Passwords use Node's asynchronous scrypt with a unique 16-byte random salt
+(`N=32768, r=8, p=3`), following an
+[OWASP scrypt configuration](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html#scrypt).
+Only password hashes are saved. Sessions use random 32-byte bearer tokens in
+HttpOnly, SameSite=Strict cookies, with only their SHA-256 digests stored on the
+server. Sessions expire after seven days, rotate on login, and are revoked on
+logout. Mutations require a same-origin Origin header; registration/login
+require JSON. Auth requests are size-limited and sign-in attempts are limited
+to 20 per IP in 15 minutes. These rate limits are in memory and reset when the
+server restarts.
+
+The default server binds only to `127.0.0.1` for local HTTP use. For an HTTPS
+adaptation, enable Secure cookies with `QUIZ_SECURE_COOKIES=1`; hosting publicly
+also requires proper HTTPS/origin configuration and a production datastore.
+This implementation does not include password reset, email verification,
+social login, or profile editing. Emails are identifiers, not verified ownership.
+
+**Quiz history and latest results remain browser-wide, device-local summaries.**
+They are not account-private or synchronized. Signing out changes account/profile
+access, not these existing guest features.
+
+To isolate test accounts or choose another private storage directory:
+
+```sh
+QUIZ_DATA_DIR=/tmp/quiz-demo-accounts PORT=4188 node ui/server.js
+```
+
+Profiles are protected on the server by session identity; supplying another user
+ID in a URL cannot select that user's profile. `GET /api/auth/session` returns
+the current public user or null; `GET /api/profile` requires authentication.
+`POST /api/auth/register`, `/api/auth/login`, and `/api/auth/logout` manage the
+session. Credentials, hashes, salts, and session tokens are never included in
+public profile responses.
 
 ## Tests
 
@@ -72,10 +124,10 @@ g++ -std=c++17 -Wall -Wextra -Wpedantic -Iinclude tests/quiz_tests.cpp src/quiz.
 bash tests/cli_tests.sh
 ```
 
-Run UI parsing/scoring tests with Node.js:
+Run UI unit tests and server authentication/integration tests with Node.js:
 
 ```sh
-node --test ui/*.test.js
+npm run test:unit
 ```
 
 Install the pinned browser-test dependency and run the full browser journey:

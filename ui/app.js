@@ -20,6 +20,8 @@
       screen.hidden = screen.dataset.screen !== name;
     });
     $("[data-history-nav]").hidden = name === "quiz";
+    const accountNav = $("[data-account-nav]");
+    if (accountNav) accountNav.hidden = name === "quiz";
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
@@ -465,6 +467,7 @@
       event.repeat ||
       event.isComposing ||
       helpDialog.open ||
+      document.querySelector("dialog[open]")?.open ||
       $("[data-screen='quiz']").hidden ||
       event.altKey ||
       event.ctrlKey ||
