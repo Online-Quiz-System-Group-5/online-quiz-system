@@ -20,7 +20,7 @@
       screen.hidden = screen.dataset.screen !== name;
     });
     $("[data-history-nav]").hidden = name === "quiz";
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo({ top: 0, behavior: window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
   }
 
   function announce(message) {
@@ -29,6 +29,12 @@
     toast.hidden = false;
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => { toast.hidden = true; }, 2600);
+  }
+
+  function announceQuiz(message) {
+    const region = $("[data-quiz-announcement]");
+    if (!region) return;
+    region.textContent = message;
   }
 
   function getBrowserStorage() {
@@ -189,9 +195,11 @@
     const percentage = Math.round((number / count) * 100);
     $("[data-question-index]").textContent = String(number).padStart(2, "0");
     $("[data-question-prompt]").textContent = question.prompt;
+    announceQuiz(`Question ${number} of ${count}. ${question.prompt}`);
     $("[data-progress-text]").textContent = `QUESTION ${number} OF ${count}`;
     $("[data-progress-percent]").textContent = `${percentage}%`;
     const progress = $("[data-progress-bar]");
+    progress.setAttribute("aria-valuetext", `Question ${number} of ${count}`);
     progress.setAttribute("aria-valuenow", String(Math.round(((number - 1) / count) * 100)));
     $(".progress-track span").style.width = `${Math.round(((number - 1) / count) * 100)}%`;
     $("[data-side-answered]").textContent = `${number - 1} answered`;
@@ -203,7 +211,7 @@
       </button>`).join("");
     $("[data-session-dots]").innerHTML = state.questions.map((_, index) => {
       const className = index < state.index ? "done" : index === state.index ? "current" : "";
-      return `<span class="session-dot ${className}" aria-label="Question ${index + 1}${index < state.index ? ", answered" : index === state.index ? ", current" : ""}"></span>`;
+      return `<span role="listitem" class="session-dot ${className}" aria-label="Question ${index + 1}${index < state.index ? ", answered" : index === state.index ? ", current" : ""}"></span>`;
     }).join("");
     $$("[data-option]").forEach((button) => {
       button.addEventListener("click", () => selectOption(Number(button.dataset.option)));
@@ -221,6 +229,7 @@
       return;
     }
     state.selected = index;
+    announceQuiz(`Selected answer ${index + 1}: ${state.questions[state.index].options[index]}`);
     $$("[data-option]").forEach((button) => {
       const selected = Number(button.dataset.option) === index;
       button.classList.toggle("selected", selected);
@@ -296,6 +305,7 @@
     $("[data-filter-unanswered-count]").textContent = String(reviewStates.filter((value) => value === "unanswered").length);
     applyReviewFilter("all");
     showScreen("results");
+    announceQuiz(`Quiz complete. Your score is ${result.percentage} percent. ${result.correct} of ${result.total} answers correct.`);
     if (!resultSaved || !historySaved) announce("Your result is shown, but this browser could not save all score details for later.");
   }
 
