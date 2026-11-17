@@ -242,7 +242,26 @@
     return selected.slice(0, count);
   }
 
-  return { parseQuestionBank, inspectQuestionBank, scoreQuiz, getReviewState, prepareQuiz,
+  function resetQuizSession(state) {
+    state.answers = [];
+    state.index = 0;
+    state.selected = null;
+  }
+  function replaceQuestionBank(state, contents, source) {
+    const questions = parseQuestionBank(contents);
+    state.bankQuestions = questions;
+    state.questions = [];
+    state.bankErrors = [];
+    state.source = source;
+    resetQuizSession(state);
+    return questions;
+  }
+  async function loadQuestionBankFromResponse(state, response, source) {
+    if (!response || !response.ok) throw new Error("Sample file could not be loaded.");
+    return replaceQuestionBank(state, await response.text(), source);
+  }
+
+  return { resetQuizSession, replaceQuestionBank, loadQuestionBankFromResponse, parseQuestionBank, inspectQuestionBank, scoreQuiz, getReviewState, prepareQuiz,
     isTimerExpired, resolveTimedAnswer, createTimerController,
     saveLatestResult, readLatestResult, clearLatestResult,
     readHistory, addHistoryEntry, clearHistory, historyLimit };

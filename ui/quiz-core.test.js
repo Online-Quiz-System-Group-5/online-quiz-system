@@ -148,3 +148,17 @@ test("reports an empty question bank without losing line-specific errors", () =>
   assert.equal(inspectQuestionBank("Broken|record").questions.length, 0);
   assert.equal(inspectQuestionBank("Broken|record").errors[0].line, 1);
 });
+
+
+test("replacement validates before updating state", async () => {
+  const core = require("./quiz-core.js");
+  const state = { bankQuestions: [], answers: [1], index: 2, selected: 1 };
+  const previous = JSON.stringify(state);
+  assert.throws(() => core.replaceQuestionBank(state, "bad", "Bad"));
+  assert.equal(JSON.stringify(state), previous);
+  await assert.rejects(core.loadQuestionBankFromResponse(state, {ok:false}, "Bad"));
+  core.replaceQuestionBank(state, "New?|A|B|1", "New");
+  assert.equal(state.bankQuestions.length, 1);
+  assert.deepEqual(state.answers, []);
+  assert.equal(state.index, 0);
+});

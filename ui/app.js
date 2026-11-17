@@ -169,9 +169,8 @@
       return;
     }
     $("[data-home-error]").hidden = true;
+    window.QuizCore.resetQuizSession(state);
     state.answers = Array(state.questions.length).fill(null);
-    state.index = 0;
-    state.selected = null;
     showScreen("quiz");
     renderQuestion({ focusPrompt: true });
   }
@@ -446,9 +445,7 @@ $("[data-keyboard-hint]").innerHTML =
   $$('[data-quit]').forEach((button) => button.addEventListener("click", () => {
     if (window.confirm("Exit this quiz? Your answers in this session will be cleared.")) {
       cancelQuestionTimer();
-      state.answers = [];
-      state.index = 0;
-      state.selected = null;
+      window.QuizCore.resetQuizSession(state);
       showScreen("home");
     }
   }));
