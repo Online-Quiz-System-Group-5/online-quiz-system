@@ -14,7 +14,6 @@ function loadApp() {
       hidden: selector === "[data-screen='results']",
       dataset: {}, style: { setProperty() {} },
       addEventListener(event, handler) { this[event] = handler; },
-      replaceChildren(...children) { this.value = children[0]?.value; }, append() {},
       setAttribute() {}, removeAttribute() {}, classList: { toggle() {} }
     });
     return elements.get(selector);
@@ -26,14 +25,13 @@ function loadApp() {
   });
   let printed = 0;
   const document = {
-    createElement: () => ({}),
     querySelector: get,
     querySelectorAll: (selector) => selector === "[data-screen]" ? screens : [],
     addEventListener() {}
   };
   vm.runInNewContext(fs.readFileSync(path.join(__dirname, "app.js"), "utf8"), {
     document, window: { QuizCore, print() { printed++; }, scrollTo() {} },
-    fetch: async () => ({ ok: true, json: async () => [{ id: "test", name: "Test", bank: "First?|Yes|No|1\nSecond?|A|B|2" }] }),
+    fetch: async () => ({ ok: true, text: async () => "First?|Yes|No|1\nSecond?|A|B|2" }),
     setTimeout, clearTimeout
   });
   return { get, prints: () => printed };

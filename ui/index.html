@@ -18,6 +18,7 @@
         <span>quizroom<span class="brand-dot">.</span></span>
       </a>
       <div class="topbar-right">
+        <span class="local-badge"><span class="status-dot"></span> Local session</span>
         <button class="button button-secondary history-nav" type="button" data-history-open data-history-nav>History</button>
         <button class="icon-button" type="button" aria-label="How it works" data-help-open>
           <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M9.7 9a2.4 2.4 0 1 1 4.1 1.7c-1.1 1-1.8 1.3-1.8 2.8M12 17h.01"></path></svg>
@@ -32,23 +33,17 @@
             <p class="eyebrow"><span class="eyebrow-line"></span> GROUP 5 · ONLINE QUIZ SYSTEM</p>
             <h1 id="home-title">A little focus.<br><span>A lot of learning.</span></h1>
             <p class="hero-lede">Take a quick quiz, trust your first thought, and see what you know. Your session stays right here on this device.</p>
-            <div class="topic-picker">
-              <label class="setup-count" for="quiz-topic"><span>Choose your topic</span>
-                <select id="quiz-topic" data-topic disabled aria-describedby="topic-help"><option value="">Loading topics…</option></select>
-              </label>
-              <p id="topic-help" class="topic-help">10 topics · 10 questions each. Or upload your own question bank below.</p>
-            </div>
             <div class="quiz-setup" aria-label="Quiz setup">
               <label class="setup-count" for="question-count">
                 <span>Questions per quiz</span>
-                <input id="question-count" type="number" min="1" max="10" value="10" inputmode="numeric" data-question-count aria-describedby="setup-help">
+                <input id="question-count" type="number" min="1" value="5" inputmode="numeric" data-question-count aria-describedby="setup-help">
               </label>
               <label class="setup-shuffle"><input type="checkbox" data-shuffle> <span>Shuffle question order</span></label>
             </div>
             <p class="setup-help" id="setup-help" data-setup-help>Choose how many questions to answer.</p>
             <div class="timer-setup">
               <label class="setup-shuffle"><input type="checkbox" data-timer-enabled> <span>Use a per-question timer</span></label>
-              <label class="setup-count timer-length" data-timer-setting for="timer-seconds">
+              <label class="setup-count timer-length" data-timer-setting hidden for="timer-seconds">
                 <span>Seconds per question</span>
                 <input id="timer-seconds" type="number" min="5" max="120" value="30" inputmode="numeric" data-timer-seconds>
               </label>
@@ -61,19 +56,11 @@
             </div>
             <div class="source-row">
               <span class="source-icon" aria-hidden="true">↳</span>
-              <span>Question bank: <strong data-source-name>Loading topic questions</strong></span>
+              <span>Question bank: <strong data-source-name>Loading sample questions</strong></span>
               <label class="file-button" for="question-file">Change file</label>
               <button class="file-button preview-toggle" type="button" data-preview-toggle aria-expanded="false" aria-controls="bank-preview">Preview questions</button>
-              <input class="visually-hidden" id="question-file" type="file" accept=".txt,text/plain" aria-describedby="upload-format">
+              <input class="visually-hidden" id="question-file" type="file" accept=".txt,text/plain">
             </div>
-            <details class="upload-guide" id="upload-format">
-              <summary>Uploading your own questions? See the file format</summary>
-              <p>Choose a UTF-8 plain text <strong>.txt</strong> file, up to 5 MB. Put one question per line, with fields separated by <strong>|</strong>.</p>
-              <pre>Question|Option 1|Option 2|Option 3|Option 4|Correct option number
-Which planet is closest to the Sun?|Venus|Mercury|Mars|Earth|2</pre>
-              <p>Include at least two non-empty options. The last field is the correct option number, starting at 1. Do not include a header row or use | inside a question or option. Blank lines are ignored. Quizzes use up to 10 questions from your file.</p>
-              <a class="file-button" href="question-template.txt" download>Download example .txt file</a>
-            </details>
             <section class="bank-preview" id="bank-preview" data-bank-preview aria-labelledby="preview-title" hidden>
               <div class="preview-heading"><h2 id="preview-title">Question bank preview</h2><span data-preview-summary></span></div>
               <ol class="preview-questions" data-preview-questions></ol>
@@ -196,7 +183,7 @@ Which planet is closest to the Sun?|Venus|Mercury|Mars|Earth|2</pre>
     <p class="eyebrow"><span class="eyebrow-line"></span> A QUICK NOTE</p>
     <h2 id="help-title">How quizroom works</h2>
     <p>Choose an answer for each question, then continue. Your score and the answer review appear after the last question.</p>
-    <p>You can use the number keys shown beside the options. Choose from 10 topics and take a quiz of 1–10 questions. To upload your own bank, use a UTF-8 .txt file with one question per line: Question|Option 1|Option 2|Correct option number. Find a downloadable example below the Change file button.</p>
+    <p>You can use the number keys shown beside the options. Import a plain text question bank using the same pipe-separated format as the project sample file.</p>
     <button class="button button-primary dialog-done" type="button" data-help-close>Got it</button>
   </dialog>
 

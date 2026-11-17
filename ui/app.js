@@ -7,7 +7,6 @@
   const screens = $$('[data-screen]');
   const timerController = window.QuizCore.createTimerController();
   let toastTimer;
-  let topicBanks = [];
 
   function escapeHTML(value) {
     return String(value).replace(/[&<>"']/g, (character) => ({
@@ -72,17 +71,17 @@
   function updateHome() {
     const ready = state.bankQuestions.length > 0;
     const countInput = $("[data-question-count]");
-    const available = Math.min(10, state.bankQuestions.length);
+    const available = state.bankQuestions.length;
     countInput.max = String(Math.max(1, available));
     const requestedCount = Number(countInput.value);
     if (!Number.isInteger(requestedCount) || requestedCount < 1 || requestedCount > available) {
-      countInput.value = String(Math.max(1, available));
+      countInput.value = String(Math.min(5, Math.max(1, available)));
     }
     $("[data-setup-help]").textContent = ready
-      ? `Choose 1–${available} from your ${state.bankQuestions.length} loaded questions.`
+      ? `Choose 1–${available} from your ${available} loaded questions.`
       : "Load a question bank to set the quiz length.";
     $("[data-start]").disabled = !ready;
-    $("[data-home-count]").textContent = ready ? state.bankQuestions.length : "0";
+    $("[data-home-count]").textContent = ready ? available : "0";
     $("[data-source-name]").textContent = state.source;
   }
 
@@ -295,50 +294,20 @@ $("[data-keyboard-hint]").innerHTML =
     if (!resultSaved || !historySaved) announce("Your result is shown, but this browser could not save all score details for later.");
   }
 
-  function selectTopic(id) {
-    const topic = topicBanks.find((entry) => entry.id === id);
-    if (!topic) return;
-    state.bankQuestions = window.QuizCore.parseQuestionBank(topic.bank);
-    state.bankErrors = [];
-    state.source = topic.name;
-    $("[data-home-error]").hidden = true;
-    updateHome();
-    renderBankPreview();
-  }
-
   async function loadDefaultQuestions() {
-    const select = $("[data-topic]");
     try {
-      const response = await fetch("/topics.json");
-      if (!response.ok) throw new Error("Topic banks could not be loaded.");
-      topicBanks = await response.json();
-      select.replaceChildren(...topicBanks.map((topic) => {
-        const option = document.createElement("option");
-        option.value = topic.id;
-        option.textContent = topic.name;
-        return option;
-      }));
-      const customOption = document.createElement("option");
-      customOption.value = "custom";
-      customOption.textContent = "Custom uploaded file";
-      customOption.disabled = true;
-      select.append(customOption);
-      select.disabled = false;
-      // An import may finish before the topic catalogue loads.
-      if (state.bankQuestions.length) select.value = "custom";
-      else selectTopic(select.value);
+      const response = await fetch("/questions.txt");
+      if (!response.ok) throw new Error("Sample file could not be loaded.");
+      state.bankQuestions = window.QuizCore.parseQuestionBank(await response.text());
+      state.bankErrors = [];
+      state.source = "Sample question bank";
+      updateHome();
     } catch (error) {
-      const unavailable = document.createElement("option");
-      unavailable.textContent = "Topics unavailable — upload a file";
-      unavailable.value = "";
-      select.replaceChildren(unavailable);
-      $("[data-home-error]").textContent = "Couldn't load topics. Choose a valid .txt question file to continue.";
+      $("[data-home-error]").textContent = "Couldn't load the sample bank. Choose a valid .txt question file to continue.";
       $("[data-home-error]").hidden = false;
       updateHome();
     }
   }
-
-  $("[data-topic]").addEventListener("change", (event) => selectTopic(event.target.value));
 
   $("#question-file").addEventListener("change", async (event) => {
     const file = event.target.files && event.target.files[0];
@@ -346,13 +315,8 @@ $("[data-keyboard-hint]").innerHTML =
     const errorBox = $("[data-home-error]");
     errorBox.hidden = true;
     try {
-      if (!file.name.toLowerCase().endsWith(".txt")) throw new Error("Choose a UTF-8 .txt file. Open the file format guide for an example.");
       if (file.size > 5 * 1024 * 1024) throw new Error("Please choose a question file smaller than 5 MB.");
       const report = window.QuizCore.inspectQuestionBank(await file.text());
-      if (!report.questions.length) {
-        throw new Error("No usable questions were found. " + (report.errors[0]?.message || "Check the file format guide."));
-      }
-      $("[data-topic]").value = "custom";
       state.bankQuestions = report.questions;
       state.bankErrors = report.errors;
       state.source = file.name;
@@ -378,10 +342,10 @@ $("[data-keyboard-hint]").innerHTML =
   const timerEnabledInput = $("[data-timer-enabled]");
   const timerSettings = $("[data-timer-setting]");
   const timerSecondsInput = $("[data-timer-seconds]");
-  timerSettings.hidden = false;
+  timerSettings.hidden = !timerEnabledInput.checked;
   timerSecondsInput.disabled = !timerEnabledInput.checked;
   timerEnabledInput.addEventListener("change", () => {
-    timerSettings.hidden = false;
+    timerSettings.hidden = !timerEnabledInput.checked;
     timerSecondsInput.disabled = !timerEnabledInput.checked;
     $("[data-home-error]").hidden = true;
   });
@@ -397,8 +361,8 @@ $("[data-keyboard-hint]").innerHTML =
     const countInput = $("[data-question-count]");
     const count = Number(countInput.value);
     const errorBox = $("[data-home-error]");
-    if (!Number.isInteger(count) || count < 1 || count > Math.min(10, state.bankQuestions.length)) {
-      errorBox.textContent = `Choose a whole number from 1 to ${Math.min(10, state.bankQuestions.length)}.`;
+    if (!Number.isInteger(count) || count < 1 || count > state.bankQuestions.length) {
+      errorBox.textContent = `Choose a whole number from 1 to ${state.bankQuestions.length}.`;
       errorBox.hidden = false;
       $("[data-start]").disabled = true;
       return;
