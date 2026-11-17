@@ -133,7 +133,7 @@
     }
     state.index += 1;
     state.selected = null;
-    renderQuestion();
+    renderQuestion({ focusPrompt: true });
   }
 
   function timeoutQuestion() {
@@ -173,10 +173,10 @@
     state.index = 0;
     state.selected = null;
     showScreen("quiz");
-    renderQuestion();
+    renderQuestion({ focusPrompt: true });
   }
 
-  function renderQuestion() {
+  function renderQuestion({ focusPrompt = false } = {}) {
     const question = state.questions[state.index];
     const optionCount = question.options.length;
 
@@ -209,6 +209,10 @@ $("[data-keyboard-hint]").innerHTML =
       button.addEventListener("click", () => selectOption(Number(button.dataset.option)));
     });
     startQuestionTimer();
+    if (focusPrompt) {
+      const prompt = $("[data-question-prompt]");
+      prompt?.focus?.();
+    }
   }
 
   function selectOption(index) {
@@ -457,13 +461,24 @@ $("[data-keyboard-hint]").innerHTML =
   });
 
   document.addEventListener("keydown", (event) => {
-    if (helpDialog.open || $("[data-screen='quiz']").hidden) return;
+    if (
+      helpDialog.open ||
+      $("[data-screen='quiz']").hidden ||
+      event.altKey ||
+      event.ctrlKey ||
+      event.metaKey
+    ) {
+      return;
+    }
+
     const question = state.questions[state.index];
+
     if (/^[1-9]$/.test(event.key)) {
       const option = Number(event.key) - 1;
-      if (question && option < question.options.length) selectOption(option);
-    } else if (event.key === "Enter" && state.selected !== null) {
-      nextQuestion();
+
+      if (question && option < question.options.length) {
+        selectOption(option);
+      }
     }
   });
 
