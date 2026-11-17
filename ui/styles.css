@@ -1176,3 +1176,17 @@ h1, h2, h3 {
 .upload-guide summary:focus-visible { outline: 3px solid rgba(105,88,232,.3); outline-offset: 3px; }
 .upload-guide pre { white-space: pre-wrap; overflow-wrap: anywhere; background: #faf9ff; padding: 12px; border-radius: 8px; font-size: 11px; }
 .upload-guide .file-button { display: inline-block; margin: 0; }
+
+/* Consistent keyboard focus visibility */
+:where(
+  button,
+  input,
+  select,
+  textarea,
+  a,
+  summary,
+  [tabindex]
+):focus-visible {
+  outline: 3px solid rgba(105, 88, 232, 0.75);
+  outline-offset: 3px;
+}
