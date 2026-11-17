@@ -221,9 +221,10 @@
     if (!Array.isArray(questions) || !questions.length) {
       throw new Error("Load at least one question before starting a quiz.");
     }
-    const count = options.count === undefined ? questions.length : options.count;
-    if (!Number.isInteger(count) || count < 1 || count > questions.length) {
-      throw new Error(`Choose between 1 and ${questions.length} questions.`);
+    const maximum = Math.min(10, questions.length);
+    const count = options.count === undefined ? maximum : options.count;
+    if (!Number.isInteger(count) || count < 1 || count > maximum) {
+      throw new Error(`Choose between 1 and ${maximum} questions.`);
     }
 
     const selected = [...questions];

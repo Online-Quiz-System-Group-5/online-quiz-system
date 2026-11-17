@@ -1159,3 +1159,20 @@ h1, h2, h3 {
     grid-column: 1;
   }
 }
+
+/* Topic and import setup */
+.topic-picker { margin-top: 24px; }
+.topic-picker .setup-count { gap: 10px; }
+.topic-picker select { width: 100%; min-height: 50px; padding: 10px 12px; border: 1px solid #dedaf3; border-radius: 11px; background: #faf9ff; color: var(--ink); font: inherit; font-size: 16px; }
+.topic-picker select:focus-visible { outline: 3px solid rgba(105,88,232,.3); outline-offset: 2px; }
+.topic-help { color: var(--ink-soft); font-size: 12px; line-height: 1.6; margin: 10px 3px 0; }
+.timer-setup { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; padding: 16px 18px; border: 1px solid #e6e3f5; border-radius: 16px; background: #fff; gap: 16px; }
+.timer-setup .setup-shuffle, .timer-setup .timer-length { padding: 0; border: 0; box-shadow: none; background: transparent; width: auto; min-height: 0; }
+.timer-setup .timer-length { display: grid; gap: 6px; flex: 0 1 155px; }
+.timer-length input { margin-top: 0; min-height: 42px; font-size: 17px; }
+.timer-length input:disabled { opacity: .5; cursor: not-allowed; }
+.upload-guide { margin: 16px 0 22px; padding: 14px 16px; border: 1px solid #e6e3f5; border-radius: 12px; background: #fff; font-size: 12px; line-height: 1.7; color: var(--ink-soft); }
+.upload-guide summary { cursor: pointer; font-weight: 700; color: var(--violet-dark); }
+.upload-guide summary:focus-visible { outline: 3px solid rgba(105,88,232,.3); outline-offset: 3px; }
+.upload-guide pre { white-space: pre-wrap; overflow-wrap: anywhere; background: #faf9ff; padding: 12px; border-radius: 8px; font-size: 11px; }
+.upload-guide .file-button { display: inline-block; margin: 0; }

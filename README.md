@@ -14,6 +14,19 @@ A local multiple-choice quiz project for Group 5's allocated Problem Statement 1
 - Filter answer review to incorrect or unanswered questions.
 - C++ and browser-core unit/integration tests.
 
+## Topics and quiz setup
+
+Choose Astronomy, Politics & Civics, History, Geography, Physics, Chemistry,
+Biology, Technology, Literature, or Sports. Each built-in topic contains 10
+questions in `ui/topics.json`; choose 1–10 per quiz and optionally shuffle them.
+Enable the per-question timer and choose 5–120 seconds in the same control.
+Topic names are included in saved result metadata and history.
+
+Use **Change file** to upload a UTF-8 `.txt` bank up to 5 MB. The file format
+guide beside the control includes a downloadable example. Larger custom banks
+are supported, but each quiz is limited to 10 questions. An unusable import
+keeps the previously loaded bank available.
+
 ## Question-bank format
 
 Each non-empty line contains the question, at least two options, and a one-based correct-option number, separated by `|`:

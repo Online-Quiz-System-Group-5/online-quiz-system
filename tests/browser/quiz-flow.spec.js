@@ -76,11 +76,61 @@ test("learner imports a bank, completes a quiz, reviews the score, and replays",
 test("learner recovers after importing invalid question data", async ({ page }) => {
   await importBank(page, "broken-bank.txt", "Broken record|Only one option|1");
   await expect(page.locator("[data-home-error]")).toContainText("No usable questions were found");
-  await expect(page.locator("[data-start]")).toBeDisabled();
+  await expect(page.locator("[data-start]")).toBeEnabled();
+  await expect(page.locator("[data-source-name]")).toHaveText("Astronomy");
 
   await importBank(page, "recovered-bank.txt", validBank);
   await expect(page.locator("[data-home-error]")).toBeHidden();
   await expect(page.locator("[data-source-name]")).toHaveText("recovered-bank.txt");
   await expect(page.locator("[data-home-count]")).toHaveText("3");
   await expect(page.locator("[data-start]")).toBeEnabled();
+});
+
+test("learner selects a topic, completes ten questions, and saves topic metadata", async ({ page }) => {
+  await expect(page.locator("[data-topic] option:not([disabled])")).toHaveCount(10);
+  await expect(page.getByText("Local session", { exact: true })).toHaveCount(0);
+  await page.locator("[data-topic]").selectOption("chemistry");
+  await expect(page.locator("[data-source-name]")).toHaveText("Chemistry");
+  await expect(page.locator("[data-question-count]")).toHaveValue("10");
+  await page.locator("[data-question-count]").fill("11");
+  await expect(page.locator("[data-start]")).toBeDisabled();
+  await page.locator("[data-question-count]").fill("10");
+  await page.locator("[data-start]").click();
+  await expect(page.locator("[data-question-prompt]")).toContainText("atomic number");
+  for (let i = 0; i < 10; i++) {
+    await page.locator('[data-option="0"]').click();
+    await page.locator("[data-next]").click();
+  }
+  await expect(page.locator("[data-score-total]")).toHaveText("10");
+  const storage = await page.evaluate(() => JSON.stringify(localStorage));
+  expect(storage).toContain("Chemistry");
+});
+
+test("mobile setup combines timer controls and explains custom uploads", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect(page.locator(".timer-setup [data-timer-seconds]")).toBeVisible();
+  await expect(page.locator("[data-timer-seconds]")).toBeDisabled();
+  await page.locator("[data-timer-enabled]").check();
+  await expect(page.locator("[data-timer-seconds]")).toBeEnabled();
+  await page.locator("[data-timer-seconds]").fill("5");
+  await page.locator("[data-question-count]").fill("1");
+  await page.locator("[data-start]").click();
+  await expect(page.locator("[data-question-timer]")).toBeVisible();
+  await expect(page.locator("[data-screen='results']")).toBeVisible({ timeout: 10000 });
+  await expect(page.locator("[data-score-total]")).toHaveText("1");
+  await page.locator("[data-home]").first().click();
+  await page.locator(".upload-guide summary").click();
+  await expect(page.locator(".upload-guide")).toContainText("UTF-8");
+  const downloadPromise = page.waitForEvent("download");
+  await page.getByRole("link", { name: "Download example .txt file" }).click();
+  expect((await downloadPromise).suggestedFilename()).toBe("question-template.txt");
+  await importBank(page, "too-large-quiz.txt", Array.from({length: 12}, (_, i) => `Question ${i}?|A|B|1`).join("\n"));
+  await expect(page.locator("[data-question-count]")).toHaveAttribute("max", "10");
+  await expect(page.locator("[data-topic]")).toHaveValue("custom");
+  await page.locator("[data-topic]").selectOption("sports");
+  await expect(page.locator("[data-source-name]")).toHaveText("Sports");
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await page.screenshot({ path: "/tmp/quizroom-mobile.png", fullPage: true });
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.screenshot({ path: "/tmp/quizroom-desktop.png", fullPage: true });
 });
