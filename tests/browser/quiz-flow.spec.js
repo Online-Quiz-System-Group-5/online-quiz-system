@@ -31,7 +31,21 @@ test.beforeEach(async ({ page }) => {
   browserErrors.set(page, errors);
   page.on("pageerror", (error) => errors.push(`page: ${error.message}`));
   page.on("console", (message) => {
-    if (message.type() === "error") errors.push(`console: ${message.text()}`);
+    if (message.type() === "error") {
+      errors.push(
+        `console: ${message.text()} | URL: ${message.location().url}`
+      );
+    }
+  });
+  page.on("response", (response) => {
+    if (response.status() >= 400) {
+      errors.push(`HTTP ${response.status()}: ${response.url()}`);
+    }
+  });
+  page.on("response", (response) => {
+    if (response.status() === 404) {
+      console.log("404 RESOURCE:", response.url());
+    }
   });
   page.on("requestfailed", (request) => errors.push(`request: ${request.url()} (${request.failure()?.errorText})`));
   await page.goto("/");
