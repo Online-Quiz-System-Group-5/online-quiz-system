@@ -179,10 +179,10 @@
     const question = state.questions[state.index];
     const optionCount = question.options.length;
 
-$("[data-keyboard-hint]").innerHTML =
-  optionCount === 1
-    ? `<kbd>1</kbd> to choose`
-    : `<kbd>1</kbd>–<kbd>${optionCount}</kbd> to choose`;
+    const selectionHint = optionCount <= 9
+      ? `<kbd>1</kbd>–<kbd>${optionCount}</kbd> to choose`
+      : "Click or Tab to choose";
+    $("[data-keyboard-hint]").innerHTML = `${selectionHint} · <kbd>Enter</kbd> to submit`;
     const count = state.questions.length;
     const number = state.index + 1;
     const percentage = Math.round((number / count) * 100);
@@ -459,6 +459,8 @@ $("[data-keyboard-hint]").innerHTML =
 
   document.addEventListener("keydown", (event) => {
     if (
+      event.repeat ||
+      event.isComposing ||
       helpDialog.open ||
       $("[data-screen='quiz']").hidden ||
       event.altKey ||
@@ -468,12 +470,26 @@ $("[data-keyboard-hint]").innerHTML =
       return;
     }
 
+    const target = event.target;
+    if (target?.isContentEditable || target?.closest?.("input, textarea, select, [role='textbox']")) return;
+
+    if (event.key === "Enter") {
+      // Keep native Enter activation on help, exit, history, and other controls.
+      const control = target?.closest?.("button, a, summary");
+      if (control && !control.matches("[data-option], [data-next]")) return;
+      // Prevent a second native button click after submitting the answer.
+      event.preventDefault();
+      nextQuestion();
+      return;
+    }
+
     const question = state.questions[state.index];
 
     if (/^[1-9]$/.test(event.key)) {
       const option = Number(event.key) - 1;
 
       if (question && option < question.options.length) {
+        event.preventDefault();
         selectOption(option);
       }
     }
