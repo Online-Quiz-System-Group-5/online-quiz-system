@@ -201,3 +201,83 @@ test("mobile quiz answers, navigation, review filters, and replay are touch-frie
   await expect(page.locator("[data-next]")).toBeDisabled();
   await expectNoHorizontalOverflow(page);
 });
+test("base theme, header layout, and result styles remain loaded", async ({ page }) => {
+  const theme = await page.evaluate(() => {
+    const root = getComputedStyle(document.documentElement);
+    return {
+      violet: root.getPropertyValue("--violet").trim(),
+      boxSizing: getComputedStyle(document.querySelector(".setup-count input")).boxSizing,
+      headerDisplay: getComputedStyle(document.querySelector(".topbar")).display,
+      bodyMargin: getComputedStyle(document.body).margin,
+      titleColor: getComputedStyle(document.querySelector(".hero-copy h1 span")).color,
+      font: getComputedStyle(document.body).fontFamily
+    };
+  });
+  expect(theme.violet).toBe("#6958e8");
+  expect(theme.boxSizing).toBe("border-box");
+  expect(theme.headerDisplay).toBe("flex");
+  expect(theme.bodyMargin).toBe("0px");
+  expect(theme.titleColor).toBe("rgb(105, 88, 232)");
+  expect(theme.font).toContain("Segoe UI");
+  await page.locator("[data-question-count]").fill("1");
+  await page.locator("[data-start]").click();
+  await page.locator('[data-option="0"]').click();
+  await page.locator("[data-next]").click();
+  await expect(page.locator(".review-item")).toHaveCSS("display", "grid");
+  await expect(page.locator(".score-card").first()).toHaveCSS("background-color", "rgb(255, 255, 255)");
+});
+
+test("keyboard numbers select and Enter submits once, including from a focused answer", async ({ page }) => {
+  await importBank(page, "keyboard.txt", validBank);
+  await page.locator("[data-question-count]").fill("3");
+  await page.locator("[data-start]").click();
+  await expect(page.locator("[data-question-prompt]")).toBeFocused();
+  await expect(page.locator("[data-keyboard-hint]")).toContainText("Enter");
+  await page.keyboard.press("Enter");
+  await expect(page.locator("[data-question-index]")).toHaveText("01");
+  await page.keyboard.press("9");
+  await page.keyboard.press("0");
+  await expect(page.locator("[data-next]")).toBeDisabled();
+  await page.keyboard.press("Control+1");
+  await expect(page.locator("[data-next]")).toBeDisabled();
+  await page.keyboard.press("1");
+  await expect(page.locator('[data-option="0"]')).toHaveAttribute("aria-pressed", "true");
+  await page.keyboard.press("Enter");
+  await expect(page.locator("[data-question-index]")).toHaveText("02");
+  await expect(page.locator("[data-question-prompt]")).toBeFocused();
+  await expect(page.locator("[data-next]")).toBeDisabled();
+  await page.locator('[data-option="1"]').focus();
+  await page.keyboard.press("Space");
+  await expect(page.locator('[data-option="1"]')).toHaveAttribute("aria-pressed", "true");
+  await page.keyboard.press("Enter");
+  await expect(page.locator("[data-question-index]")).toHaveText("03");
+  await expect(page.locator("[data-next]")).toBeDisabled();
+  await page.keyboard.press("1");
+  await page.locator("[data-next]").focus();
+  await page.keyboard.press("Enter");
+  await expect(page.locator("[data-screen='results']")).toBeVisible();
+  await expect(page.locator("[data-score-percent]")).toHaveText("100%");
+});
+
+test("help retains native Enter and Escape and blocks quiz shortcuts", async ({ page }) => {
+  await importBank(page, "keyboard-dialog.txt", validBank);
+  await page.locator("[data-start]").click();
+  await page.keyboard.press("1");
+  await page.locator("[data-help-open]").focus();
+  await page.keyboard.press("Enter");
+  await expect(page.locator("[data-help-dialog]")).toBeVisible();
+  await page.keyboard.press("2");
+  await expect(page.locator('[data-option="0"]')).toHaveAttribute("aria-pressed", "true");
+  await page.keyboard.press("Escape");
+  await expect(page.locator("[data-help-dialog]")).not.toBeVisible();
+  await expect(page.locator("[data-question-index]")).toHaveText("01");
+  await page.locator("[data-question-prompt]").focus();
+  await page.evaluate(() => document.querySelector("[data-question-prompt]").dispatchEvent(
+    new KeyboardEvent("keydown", { key: "Enter", repeat: true, bubbles: true, cancelable: true })
+  ));
+  await expect(page.locator("[data-question-index]")).toHaveText("01");
+  await page.keyboard.press("Enter");
+  await expect(page.locator("[data-question-index]")).toHaveText("02");
+  await page.keyboard.press("Tab");
+  await expect(page.locator('[data-option="0"]')).toBeFocused();
+});
