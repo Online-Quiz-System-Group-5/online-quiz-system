@@ -1,6 +1,29 @@
+
 "use strict";
 
 const { defineConfig, devices } = require("@playwright/test");
+
+const projects = process.env.CI
+  ? [
+      {
+        name: "chrome",
+        use: { ...devices["Desktop Chrome"], channel: "chrome" }
+      },
+      {
+        name: "edge",
+        use: { ...devices["Desktop Edge"], channel: "msedge" }
+      },
+      {
+        name: "firefox",
+        use: { ...devices["Desktop Firefox"] }
+      }
+    ]
+  : [
+      {
+        name: "chrome",
+        use: { ...devices["Desktop Chrome"], channel: "chrome" }
+      }
+    ];
 
 module.exports = defineConfig({
   testDir: "./tests/browser",
@@ -12,9 +35,7 @@ module.exports = defineConfig({
     baseURL: "http://127.0.0.1:4173",
     trace: "retain-on-failure"
   },
-  projects: [
-    { name: "chromium", use: { ...devices["Desktop Chrome"] } }
-  ],
+  projects,
   webServer: {
     command: "node ui/server.js",
     url: "http://127.0.0.1:4173",
