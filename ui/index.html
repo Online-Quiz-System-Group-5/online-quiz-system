@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="en">
 <head>
@@ -142,7 +143,16 @@ Which planet is closest to the Sun?|Venus|Mercury|Mars|Earth|2</pre>
               <span class="progress-caption" data-progress-text>QUESTION 1 OF 5</span>
               <span class="progress-percent" data-progress-percent>20%</span>
             </div>
-            <div class="progress-track" role="progressbar" aria-label="Quiz progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" data-progress-bar><span></span></div>
+            <div
+              class="progress-track"
+              role="progressbar"
+              aria-label="Quiz progress"
+              aria-valuemin="0"
+              aria-valuemax="100"
+              aria-valuenow="0"
+              aria-valuetext="Quiz not started"
+              data-progress-bar
+            ><span></span></div>
             <article class="question-card">
               <div class="question-meta"><span class="question-index" data-question-index>01</span><span class="meta-rule"></span><span>TAKE YOUR TIME</span></div>
               <h1 id="quiz-title" data-question-prompt tabindex="-1"></h1>
@@ -159,7 +169,7 @@ Which planet is closest to the Sun?|Venus|Mercury|Mars|Earth|2</pre>
             <p class="side-title">One question<br>at a time.</p>
             <p class="side-copy">Your answers stay private until you finish. No rush — you can move at your own pace.</p>
             <div class="side-stat"><span class="side-stat-icon">✦</span><div><strong data-side-answered>0 answered</strong><span>Keep going, you're doing great.</span></div></div>
-            <div class="session-dots" data-session-dots aria-label="Question status"></div>
+            <div class="session-dots" data-session-dots role="list" aria-label="Question progress"></div>
             <button class="text-button side-home" type="button" data-quit>Exit quiz</button>
           </aside>
         </div>
@@ -202,5 +212,6 @@ Which planet is closest to the Sun?|Venus|Mercury|Mars|Earth|2</pre>
   </dialog>
 
   <div class="toast" data-toast role="status" aria-live="polite" hidden></div>
+  <div class="visually-hidden" data-quiz-announcement role="status" aria-live="polite" aria-atomic="true"></div>
 </body>
 </html>

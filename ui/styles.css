@@ -457,4 +457,22 @@ kbd { min-width: 18px; padding: 3px 4px; border: 1px solid #e1e2e9; border-radiu
   outline: 3px solid rgba(105, 88, 232, 0.75);
   outline-offset: 3px;
 }
+
+/* UI-06 Accessibility: respect reduced-motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .button:not(:disabled):hover,
+  .answer-option:hover,
+  .file-button:hover {
+    transform: none !important;
+  }
 }
+
