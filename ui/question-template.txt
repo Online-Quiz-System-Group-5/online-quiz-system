@@ -1,0 +1,2 @@
+Which planet is closest to the Sun?|Venus|Mercury|Mars|Earth|2
+Which gas do plants absorb during photosynthesis?|Oxygen|Carbon dioxide|Helium|Hydrogen|2
