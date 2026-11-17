@@ -9,7 +9,23 @@ A local multiple-choice quiz project for Group 5's allocated Problem Statement 1
 - Load the sample bank or import another UTF-8 `.txt` question bank.
 - Answer selection by mouse or number keys, progress display, safe exit, and replay.
 - Automatic score calculation without revealing the answer key during the quiz.
+- Local quiz history with the latest 20 score summaries and a clear-history control.
+- Print completed results and answer review, or save them as a PDF using the browser print dialog.
+- Filter answer review to incorrect or unanswered questions.
 - C++ and browser-core unit/integration tests.
+
+## Topics and quiz setup
+
+Choose Astronomy, Politics & Civics, History, Geography, Physics, Chemistry,
+Biology, Technology, Literature, or Sports. Each built-in topic contains 10
+questions in `ui/topics.json`; choose 1–10 per quiz and optionally shuffle them.
+Enable the per-question timer and choose 5–120 seconds in the same control.
+Topic names are included in saved result metadata and history.
+
+Use **Change file** to upload a UTF-8 `.txt` bank up to 5 MB. The file format
+guide beside the control includes a downloadable example. Larger custom banks
+are supported, but each quiz is limited to 10 questions. An unusable import
+keeps the previously loaded bank available.
 
 ## Question-bank format
 
@@ -59,7 +75,51 @@ bash tests/cli_tests.sh
 Run UI parsing/scoring tests with Node.js:
 
 ```sh
-node --test ui/quiz-core.test.js
+node --test ui/*.test.js
 ```
 
-GitHub Actions builds the C++ app and tests and runs the UI unit tests on pushes and pull requests.
+Install the pinned browser-test dependency and run the full browser journey:
+
+```sh
+npm ci
+npx playwright install chromium
+npm run test:browser
+```
+
+The browser suite starts the local UI server automatically and verifies question-bank
+import, invalid-input recovery, quiz start and answers, scoring, answer review, and replay.
+CI installs the same locked dependency and runs the suite in Chromium.
+
+Run the history unit and browser checks with Node.js and Playwright:
+
+```sh
+node --test ui/history.test.js
+PLAYWRIGHT_MODULE=/path/to/playwright PLAYWRIGHT_CHANNEL=chrome node ui/history.browser-check.js
+```
+
+History uses browser local storage and saves only date, question bank name, score, and
+question count. It does not save questions or answers. Clearing history does not
+clear the separate latest-result card.
+
+Check printing in Chromium (requires Playwright test tooling):
+
+```sh
+npm install --prefix /tmp/quiz-browser-tools --no-save --package-lock=false playwright@1.64.1
+/tmp/quiz-browser-tools/node_modules/.bin/playwright install chromium
+PLAYWRIGHT_MODULE=/tmp/quiz-browser-tools/node_modules/playwright node ui/print.browser-check.js
+```
+
+The browser check completes a mixed-score quiz, verifies print-only results and review,
+and writes A4 and Letter PDFs to the system temporary directory. To inspect manually,
+complete a quiz and choose **Print results / Save PDF**. Check that navigation and
+buttons are absent, all answers are readable, and review entries stay together across
+pages. Browser-generated headers and footers can be disabled in the print dialog.
+Native printing from the home screen or during a quiz prints no quiz content.
+
+Run the review-filter browser check with Playwright:
+
+```sh
+PLAYWRIGHT_MODULE=/path/to/playwright PLAYWRIGHT_CHANNEL=chrome node ui/review-filters.browser-check.js
+```
+
+GitHub Actions builds the C++ app and tests and runs the existing UI core tests on pushes and pull requests. Run the history, print, and review-filter browser checks with the commands above before requesting review.

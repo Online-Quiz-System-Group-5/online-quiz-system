@@ -3,3 +3,6 @@ online_quiz
 quiz_tests
 *.tmp
 build/
+node_modules/
+playwright-report/
+test-results/

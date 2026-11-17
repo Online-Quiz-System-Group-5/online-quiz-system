@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
+  <link rel="icon" href="data:,">
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#f4f6fb">
@@ -18,7 +19,7 @@
         <span>quizroom<span class="brand-dot">.</span></span>
       </a>
       <div class="topbar-right">
-        <span class="local-badge"><span class="status-dot"></span> Local session</span>
+        <button class="button button-secondary history-nav" type="button" data-history-open data-history-nav>History</button>
         <button class="icon-button" type="button" aria-label="How it works" data-help-open>
           <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M9.7 9a2.4 2.4 0 1 1 4.1 1.7c-1.1 1-1.8 1.3-1.8 2.8M12 17h.01"></path></svg>
         </button>
@@ -32,6 +33,27 @@
             <p class="eyebrow"><span class="eyebrow-line"></span> GROUP 5 · ONLINE QUIZ SYSTEM</p>
             <h1 id="home-title">A little focus.<br><span>A lot of learning.</span></h1>
             <p class="hero-lede">Take a quick quiz, trust your first thought, and see what you know. Your session stays right here on this device.</p>
+            <div class="topic-picker">
+              <label class="setup-count" for="quiz-topic"><span>Choose your topic</span>
+                <select id="quiz-topic" data-topic disabled aria-describedby="topic-help"><option value="">Loading topics…</option></select>
+              </label>
+              <p id="topic-help" class="topic-help">10 topics · 10 questions each. Or upload your own question bank below.</p>
+            </div>
+            <div class="quiz-setup" aria-label="Quiz setup">
+              <label class="setup-count" for="question-count">
+                <span>Questions per quiz</span>
+                <input id="question-count" type="number" min="1" max="10" value="10" inputmode="numeric" data-question-count aria-describedby="setup-help">
+              </label>
+              <label class="setup-shuffle"><input type="checkbox" data-shuffle> <span>Shuffle question order</span></label>
+            </div>
+            <p class="setup-help" id="setup-help" data-setup-help>Choose how many questions to answer.</p>
+            <div class="timer-setup">
+              <label class="setup-shuffle"><input type="checkbox" data-timer-enabled> <span>Use a per-question timer</span></label>
+              <label class="setup-count timer-length" data-timer-setting for="timer-seconds">
+                <span>Seconds per question</span>
+                <input id="timer-seconds" type="number" min="5" max="120" value="30" inputmode="numeric" data-timer-seconds>
+              </label>
+            </div>
             <div class="hero-actions">
               <button class="button button-primary button-large" type="button" data-start disabled>
                 Start quiz <span aria-hidden="true">→</span>
@@ -40,10 +62,24 @@
             </div>
             <div class="source-row">
               <span class="source-icon" aria-hidden="true">↳</span>
-              <span>Question bank: <strong data-source-name>Loading sample questions</strong></span>
+              <span>Question bank: <strong data-source-name>Loading topic questions</strong></span>
               <label class="file-button" for="question-file">Change file</label>
-              <input class="visually-hidden" id="question-file" type="file" accept=".txt,text/plain">
+              <button class="file-button preview-toggle" type="button" data-preview-toggle aria-expanded="false" aria-controls="bank-preview">Preview questions</button>
+              <input class="visually-hidden" id="question-file" type="file" accept=".txt,text/plain" aria-describedby="upload-format">
             </div>
+            <details class="upload-guide" id="upload-format">
+              <summary>Uploading your own questions? See the file format</summary>
+              <p>Choose a UTF-8 plain text <strong>.txt</strong> file, up to 5 MB. Put one question per line, with fields separated by <strong>|</strong>.</p>
+              <pre>Question|Option 1|Option 2|Option 3|Option 4|Correct option number
+Which planet is closest to the Sun?|Venus|Mercury|Mars|Earth|2</pre>
+              <p>Include at least two non-empty options. The last field is the correct option number, starting at 1. Do not include a header row or use | inside a question or option. Blank lines are ignored. Quizzes use up to 10 questions from your file.</p>
+              <a class="file-button" href="question-template.txt" download>Download example .txt file</a>
+            </details>
+            <section class="bank-preview" id="bank-preview" data-bank-preview aria-labelledby="preview-title" hidden>
+              <div class="preview-heading"><h2 id="preview-title">Question bank preview</h2><span data-preview-summary></span></div>
+              <ol class="preview-questions" data-preview-questions></ol>
+              <div class="preview-errors" data-preview-errors role="alert" hidden></div>
+            </section>
             <p class="inline-error" role="alert" data-home-error hidden></p>
           </div>
           <aside class="hero-art" aria-label="Quiz overview">
@@ -67,6 +103,31 @@
           <div class="how-divider" aria-hidden="true"></div>
           <div class="how-card"><span class="step-number">03</span><div><strong>See your progress</strong><p>Get a score and review at the end.</p></div></div>
         </div>
+        <section class="latest-result" data-latest-result aria-labelledby="latest-result-title" hidden>
+          <div>
+            <p class="eyebrow"><span class="eyebrow-line"></span> SAVED ON THIS DEVICE</p>
+            <h2 id="latest-result-title">Your latest result</h2>
+            <p class="latest-score"><strong data-latest-score></strong><span data-latest-count></span></p>
+            <p class="latest-meta">Question bank: <strong data-latest-bank></strong></p>
+            <p class="latest-meta">Completed <time data-latest-date></time></p>
+          </div>
+          <button class="button button-secondary" type="button" data-clear-latest>Clear saved result</button>
+        </section>
+        <button class="button button-secondary history-home-link" type="button" data-history-open>View quiz history</button>
+      </section>
+
+      <section class="screen history-screen" data-screen="history" aria-labelledby="history-title" hidden>
+        <div class="history-wrap">
+          <button class="text-button" type="button" data-history-back>← Back to home</button>
+          <p class="eyebrow"><span class="eyebrow-line"></span> SAVED ON THIS DEVICE</p>
+          <h1 id="history-title">Quiz history</h1>
+          <p>Recent scores from this browser. Questions and answers are never saved here.</p>
+          <p class="history-message" data-history-warning role="status" hidden></p>
+          <p class="history-message" data-history-empty>No completed quizzes yet.</p>
+          <p class="history-message" data-history-full hidden>Showing your latest 20 results. Older scores are removed as new ones are added.</p>
+          <ol class="history-list" data-history-list></ol>
+          <button class="button button-secondary" type="button" data-history-clear hidden>Clear history</button>
+        </div>
       </section>
 
       <section class="screen quiz-screen" data-screen="quiz" aria-labelledby="quiz-title" hidden>
@@ -75,6 +136,7 @@
             <div class="quiz-heading-row">
               <button class="text-button" type="button" data-quit>← <span>Exit quiz</span></button>
               <span class="quiz-session-label"><span class="status-dot"></span> QUIZ IN PROGRESS</span>
+              <span class="quiz-timer" data-question-timer role="timer" aria-live="polite" hidden><span>TIME LEFT</span><strong data-timer-value>00:30</strong></span>
             </div>
             <div class="progress-row">
               <span class="progress-caption" data-progress-text>QUESTION 1 OF 5</span>
@@ -83,11 +145,11 @@
             <div class="progress-track" role="progressbar" aria-label="Quiz progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" data-progress-bar><span></span></div>
             <article class="question-card">
               <div class="question-meta"><span class="question-index" data-question-index>01</span><span class="meta-rule"></span><span>TAKE YOUR TIME</span></div>
-              <h1 id="quiz-title" data-question-prompt></h1>
+              <h1 id="quiz-title" data-question-prompt tabindex="-1"></h1>
               <p class="answer-instruction">Select one answer below</p>
               <div class="answer-list" role="group" aria-label="Answer choices" data-options></div>
               <div class="question-footer">
-                <span class="keyboard-hint"><kbd>1</kbd>–<kbd>4</kbd> to choose</span>
+                <span class="keyboard-hint" data-keyboard-hint></span>
                 <button class="button button-primary" type="button" data-next disabled>Continue <span aria-hidden="true">→</span></button>
               </div>
             </article>
@@ -116,8 +178,14 @@
             <article class="score-card score-total"><span class="score-icon">#</span><span class="score-label">QUESTIONS</span><strong data-score-total>0</strong></article>
           </div>
           <div class="review-heading"><div><p class="eyebrow"><span class="eyebrow-line"></span> ANSWER REVIEW</p><h2>What you answered</h2></div><span class="review-count" data-review-count></span></div>
+          <div class="review-filters" role="group" aria-label="Filter answer review">
+            <button type="button" data-review-filter="all" aria-pressed="true">All <span data-filter-all-count>0</span></button>
+            <button type="button" data-review-filter="incorrect" aria-pressed="false">Incorrect <span data-filter-incorrect-count>0</span></button>
+            <button type="button" data-review-filter="unanswered" aria-pressed="false">Unanswered <span data-filter-unanswered-count>0</span></button>
+          </div>
+          <p class="review-empty" data-review-empty role="status" hidden></p>
           <div class="review-list" data-review-list></div>
-          <div class="results-actions"><button class="button button-primary button-large" type="button" data-retry>Try again <span aria-hidden="true">↻</span></button><button class="button button-secondary button-large" type="button" data-home>Back to home</button></div>
+          <div class="results-actions"><button class="button button-secondary button-large" type="button" data-print>Print results / Save PDF</button><button class="button button-primary button-large" type="button" data-retry>Try again <span aria-hidden="true">↻</span></button><button class="button button-secondary button-large" type="button" data-home>Back to home</button></div>
         </div>
       </section>
     </main>
@@ -129,7 +197,7 @@
     <p class="eyebrow"><span class="eyebrow-line"></span> A QUICK NOTE</p>
     <h2 id="help-title">How quizroom works</h2>
     <p>Choose an answer for each question, then continue. Your score and the answer review appear after the last question.</p>
-    <p>You can use the number keys shown beside the options. Import a plain text question bank using the same pipe-separated format as the project sample file.</p>
+    <p>You can use the number keys shown beside the options. Choose from 10 topics and take a quiz of 1–10 questions. To upload your own bank, use a UTF-8 .txt file with one question per line: Question|Option 1|Option 2|Correct option number. Find a downloadable example below the Change file button.</p>
     <button class="button button-primary dialog-done" type="button" data-help-close>Got it</button>
   </dialog>
 
