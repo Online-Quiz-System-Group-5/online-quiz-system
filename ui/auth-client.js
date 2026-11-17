@@ -7,6 +7,7 @@
   const nav = $("[data-account-nav]");
   let mode = "login";
   let busy = false;
+  let authGeneration = 0;
   let user = null;
   let returnFocus = null;
 
@@ -33,6 +34,7 @@
   }
   function setBusy(value) {
     busy = value;
+    if (value) authGeneration++;
     form.setAttribute("aria-busy", String(value));
     $("[data-auth-submit]").disabled = value;
     $("[data-auth-toggle]").disabled = value;
@@ -144,8 +146,12 @@
     } finally { setBusy(false); }
   });
   async function refreshSession() {
+    if (busy) return;
+    const generation = authGeneration;
     try {
-      setUser((await api("/api/auth/session")).user);
+      const data = await api("/api/auth/session");
+      if (busy || generation !== authGeneration) return;
+      setUser(data.user);
       if (dialog.open && user && !$("[data-profile-panel]").hidden) showProfile(user);
     }
     catch {

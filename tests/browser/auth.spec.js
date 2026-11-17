@@ -61,6 +61,7 @@ test("registration, refresh, logout, invalid login, and returning login work thr
   await expect(page.locator("[data-profile-email]")).toHaveText(email);
   await expect(page).toHaveURL(/\/profile$/);
   await page.locator("[data-auth-logout]").click();
+  await expect(page.locator("[data-auth-status]")).toHaveText("You have signed out.");
   expect((await page.request.get("/api/profile")).status()).toBe(401);
   await page.reload();
   await expect(page.locator("[data-account-nav]")).toHaveText("Sign in");
