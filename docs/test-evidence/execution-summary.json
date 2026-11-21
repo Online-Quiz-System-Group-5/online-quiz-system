@@ -1,0 +1,72 @@
+{
+  "tested_revision": "73bf9c9e9ea109fd71ae855b0ae26908edefc42d",
+  "execution_date": "2026-11-21",
+  "environment": "macOS arm64; Node 22.20.0; Apple clang 21; Playwright 1.64.1; installed Google Chrome",
+  "browser_stats": {
+    "startTime": "2026-11-21T13:30:10.901Z",
+    "duration": 14739.241,
+    "expected": 8,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "browser_tests": [
+    {
+      "title": "learner imports a bank, completes a quiz, reviews the score, and replays",
+      "passed": true,
+      "project": "chrome"
+    },
+    {
+      "title": "learner recovers after importing invalid question data",
+      "passed": true,
+      "project": "chrome"
+    },
+    {
+      "title": "learner selects a topic, completes ten questions, and saves topic metadata",
+      "passed": true,
+      "project": "chrome"
+    },
+    {
+      "title": "mobile setup combines timer controls and explains custom uploads",
+      "passed": true,
+      "project": "chrome"
+    },
+    {
+      "title": "mobile quiz answers, navigation, review filters, and replay are touch-friendly",
+      "passed": true,
+      "project": "chrome"
+    },
+    {
+      "title": "base theme, header layout, and result styles remain loaded",
+      "passed": true,
+      "project": "chrome"
+    },
+    {
+      "title": "keyboard numbers select and Enter submits once, including from a focused answer",
+      "passed": true,
+      "project": "chrome"
+    },
+    {
+      "title": "help retains native Enter and Escape and blocks quiz shortcuts",
+      "passed": true,
+      "project": "chrome"
+    }
+  ],
+  "supplementary_checks": [
+    {
+      "file": "ui/history.browser-check.js",
+      "result": "FAIL",
+      "observation": "Timeout at line 30 opening History while quiz still active. Fixture mocks questions.txt but current UI loads topics.json."
+    },
+    {
+      "file": "ui/print.browser-check.js",
+      "result": "FAIL",
+      "observation": "Timeout at line 31 clicking disabled Start after selecting 30 questions. Current attempt limit is 10."
+    },
+    {
+      "file": "ui/review-filters.browser-check.js",
+      "result": "FAIL",
+      "observation": "Assertion at line 45 expected Incorrect question / Wrong / Right, but current topic questions were loaded instead of the old mocked bank."
+    }
+  ]
+}

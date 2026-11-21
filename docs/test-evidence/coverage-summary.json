@@ -1,0 +1,126 @@
+{
+  "revision": "73bf9c9e9ea109fd71ae855b0ae26908edefc42d",
+  "cpp": {
+    "files": [
+      {
+        "filename": "src/main.cpp",
+        "summary": {
+          "branches": {
+            "count": 11,
+            "covered": 10,
+            "notcovered": 1,
+            "percent": 90.9090909090909
+          },
+          "functions": {
+            "count": 1,
+            "covered": 1,
+            "percent": 100
+          },
+          "instantiations": {
+            "count": 1,
+            "covered": 1,
+            "percent": 100
+          },
+          "lines": {
+            "count": 37,
+            "covered": 34,
+            "percent": 91.8918918918919
+          },
+          "mcdc": {
+            "count": 0,
+            "covered": 0,
+            "notcovered": 0,
+            "percent": 0
+          },
+          "regions": {
+            "count": 23,
+            "covered": 22,
+            "notcovered": 1,
+            "percent": 95.65217391304348
+          }
+        }
+      },
+      {
+        "filename": "src/quiz.cpp",
+        "summary": {
+          "branches": {
+            "count": 68,
+            "covered": 60,
+            "notcovered": 8,
+            "percent": 88.23529411764706
+          },
+          "functions": {
+            "count": 7,
+            "covered": 7,
+            "percent": 100
+          },
+          "instantiations": {
+            "count": 7,
+            "covered": 7,
+            "percent": 100
+          },
+          "lines": {
+            "count": 157,
+            "covered": 145,
+            "percent": 92.35668789808918
+          },
+          "mcdc": {
+            "count": 0,
+            "covered": 0,
+            "notcovered": 0,
+            "percent": 0
+          },
+          "regions": {
+            "count": 107,
+            "covered": 101,
+            "notcovered": 6,
+            "percent": 94.39252336448598
+          }
+        }
+      }
+    ],
+    "totals": {
+      "branches": {
+        "count": 79,
+        "covered": 70,
+        "notcovered": 9,
+        "percent": 88.60759493670885
+      },
+      "functions": {
+        "count": 8,
+        "covered": 8,
+        "percent": 100
+      },
+      "instantiations": {
+        "count": 8,
+        "covered": 8,
+        "percent": 100
+      },
+      "lines": {
+        "count": 194,
+        "covered": 179,
+        "percent": 92.26804123711341
+      },
+      "mcdc": {
+        "count": 0,
+        "covered": 0,
+        "notcovered": 0,
+        "percent": 0
+      },
+      "regions": {
+        "count": 130,
+        "covered": 123,
+        "notcovered": 7,
+        "percent": 94.61538461538461
+      }
+    }
+  },
+  "javascript": {
+    "source": "ui/quiz-core.js",
+    "line_percent": 97.39,
+    "branch_percent": 85.38,
+    "function_percent": 100.0,
+    "uncovered_lines": "69-70, 166-167, 216-217, 261",
+    "method": "Node 22 --experimental-test-coverage across ui/*.test.js. app.js VM executions and server.js are not included in this source metric."
+  }
+}

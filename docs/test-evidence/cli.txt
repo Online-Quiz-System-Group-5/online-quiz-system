@@ -1,0 +1,9 @@
+PASS: TC-RESULT-02 replay starts a second quiz
+PASS: TC-RESULT-03 replay resets the score
+PASS: TC-RESULT-05 each attempt displays a consistent result summary
+PASS: TC-UI-01 welcome, invalid menu recovery, and exit flow
+PASS: TC-INPUT-03 invalid quiz answer is rejected and the session recovers
+PASS: TC-REL-01 end-of-input during a quiz terminates with a clear diagnostic
+PASS: TC-LOAD-04 malformed bank fails safely with a startup diagnostic
+PASS: TC-INPUT-04 EOF at menu exits gracefully
+PASS: TC-INPUT-05 EOF during quiz is handled safely

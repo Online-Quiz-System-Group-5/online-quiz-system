@@ -1,0 +1,162 @@
+TAP version 13
+# Subtest: history stores metadata only, newest first, and caps at 20
+ok 1 - history stores metadata only, newest first, and caps at 20
+  ---
+  duration_ms: 5.279625
+  type: 'test'
+  ...
+# Subtest: corrupt, partial, and unavailable storage is handled
+ok 2 - corrupt, partial, and unavailable storage is handled
+  ---
+  duration_ms: 0.20625
+  type: 'test'
+  ...
+# Subtest: print is restricted to completed results and retains score and review
+ok 3 - print is restricted to completed results and retains score and review
+  ---
+  duration_ms: 8.948833
+  type: 'test'
+  ...
+# Subtest: loads multiple records and converts one-based keys
+ok 4 - loads multiple records and converts one-based keys
+  ---
+  duration_ms: 2.356458
+  type: 'test'
+  ...
+# Subtest: ignores blank lines and accepts a bank without a final newline
+ok 5 - ignores blank lines and accepts a bank without a final newline
+  ---
+  duration_ms: 0.147209
+  type: 'test'
+  ...
+# Subtest: rejects empty banks and incomplete or empty fields with a line
+ok 6 - rejects empty banks and incomplete or empty fields with a line
+  ---
+  duration_ms: 1.499333
+  type: 'test'
+  ...
+# Subtest: rejects non-numeric and out-of-range answer keys
+ok 7 - rejects non-numeric and out-of-range answer keys
+  ---
+  duration_ms: 0.197
+  type: 'test'
+  ...
+# Subtest: scores quiz answers and rounds percentage to a whole number
+ok 8 - scores quiz answers and rounds percentage to a whole number
+  ---
+  duration_ms: 1.537042
+  type: 'test'
+  ...
+# Subtest: rejects missing and invalid answers
+ok 9 - rejects missing and invalid answers
+  ---
+  duration_ms: 0.282
+  type: 'test'
+  ...
+# Subtest: counts timed-out questions as unanswered without rejecting the full quiz
+ok 10 - counts timed-out questions as unanswered without rejecting the full quiz
+  ---
+  duration_ms: 0.134709
+  type: 'test'
+  ...
+# Subtest: classifies correct, incorrect, and unanswered review entries
+ok 11 - classifies correct, incorrect, and unanswered review entries
+  ---
+  duration_ms: 0.213291
+  type: 'test'
+  ...
+# Subtest: accepts a last-second answer at the deadline and times out after it
+ok 12 - accepts a last-second answer at the deadline and times out after it
+  ---
+  duration_ms: 0.127584
+  type: 'test'
+  ...
+# Subtest: cancels a running question timer when the quiz exits
+ok 13 - cancels a running question timer when the quiz exits
+  ---
+  duration_ms: 0.221166
+  type: 'test'
+  ...
+# Subtest: stores only latest score metadata and can clear it
+ok 14 - stores only latest score metadata and can clear it
+  ---
+  duration_ms: 1.416666
+  type: 'test'
+  ...
+# Subtest: handles corrupted or unavailable result storage safely
+ok 15 - handles corrupted or unavailable result storage safely
+  ---
+  duration_ms: 0.318959
+  type: 'test'
+  ...
+# Subtest: prepares the requested quiz length and keeps answer keys attached
+ok 16 - prepares the requested quiz length and keeps answer keys attached
+  ---
+  duration_ms: 0.138625
+  type: 'test'
+  ...
+# Subtest: shuffles question records before selecting the requested count
+ok 17 - shuffles question records before selecting the requested count
+  ---
+  duration_ms: 0.098208
+  type: 'test'
+  ...
+# Subtest: rejects quiz sizes below one, above the bank, and for an empty bank
+ok 18 - rejects quiz sizes below one, above the bank, and for an empty bank
+  ---
+  duration_ms: 0.146959
+  type: 'test'
+  ...
+# Subtest: previews valid questions and reports each malformed record with its line
+ok 19 - previews valid questions and reports each malformed record with its line
+  ---
+  duration_ms: 0.081083
+  type: 'test'
+  ...
+# Subtest: reports an empty question bank without losing line-specific errors
+ok 20 - reports an empty question bank without losing line-specific errors
+  ---
+  duration_ms: 0.04925
+  type: 'test'
+  ...
+# Subtest: replacement validates before updating state
+ok 21 - replacement validates before updating state
+  ---
+  duration_ms: 0.297708
+  type: 'test'
+  ...
+# Subtest: catalogue has ten distinct topics and 100 valid distinct questions
+ok 22 - catalogue has ten distinct topics and 100 valid distinct questions
+  ---
+  duration_ms: 2.505583
+  type: 'test'
+  ...
+# Subtest: large imported banks allow at most ten questions per attempt
+ok 23 - large imported banks allow at most ten questions per attempt
+  ---
+  duration_ms: 0.862917
+  type: 'test'
+  ...
+1..23
+# tests 23
+# suites 0
+# pass 23
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 71.190666
+# start of coverage report
+# -----------------------------------------------------------------------------
+# file               | line % | branch % | funcs % | uncovered lines
+# -----------------------------------------------------------------------------
+# ui                 |        |          |         |
+#  history.test.js   | 100.00 |   100.00 |  100.00 |
+#  print.test.js     | 100.00 |   100.00 |   89.47 |
+#  quiz-core.js      |  97.39 |    85.38 |  100.00 | 69-70 166-167 216-217 261
+#  quiz-core.test.js | 100.00 |   100.00 |   97.73 |
+#  topics.test.js    | 100.00 |   100.00 |  100.00 |
+# -----------------------------------------------------------------------------
+# all files          |  98.77 |    91.12 |   97.14 |
+# -----------------------------------------------------------------------------
+# end of coverage report

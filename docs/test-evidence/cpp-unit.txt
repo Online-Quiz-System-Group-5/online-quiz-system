@@ -1,0 +1,45 @@
+PASS: TC-LOAD-01 loads valid questions and answer key
+PASS: TC-LOAD-03 missing question bank is rejected
+PASS: TC-LOAD-03 empty question bank is rejected
+PASS: TC-LOAD-02 / TC-SEC-03 malformed question data is rejected before play
+PASS: TC-LOAD-02 empty option is rejected
+PASS: TC-LOAD-03 out-of-range answer key prevents starting a quiz
+PASS: TC-LOAD-06 invalid answer-key text explains the accepted value
+PASS: TC-LOAD-06 answer-key range error identifies the line and valid range
+PASS: TC-LOAD-06 empty-option error identifies the option number
+PASS: TC-LOAD-06 incomplete-record error describes the missing data
+PASS: TC-LOAD-01 valid records support different option counts and upper answer boundary
+PASS: TC-LOAD-05 minimum option count and inclusive answer-key boundaries load
+PASS: TC-LOAD-05 fewer than two options is rejected
+PASS: TC-LOAD-05 whitespace-only prompt is rejected
+PASS: TC-LOAD-05 answer key below the one-based range is rejected
+PASS: TC-LOAD-05 answer key above the available options is rejected
+PASS: TC-LOAD-05 answer key integer overflow is rejected
+PASS: TC-LOAD-05 oversized record is rejected safely
+PASS: TC-SCORE-01 mixed correct and incorrect answers produce the expected score
+PASS: TC-SCORE-02 all correct answers reach the maximum score
+PASS: TC-SCORE-03 all incorrect answers produce a zero score
+PASS: TC-SCORE-05 empty scoring input has a safe zero boundary
+PASS: TC-UNIT-01 answer count mismatch is rejected
+PASS: TC-INPUT-02 out-of-range answer is rejected by scoring
+PASS: TC-SCORE-05 empty scoring input has a safe zero boundary
+PASS: TC-SCORE-07 incomplete answer set, including a skipped answer, is rejected
+PASS: TC-INPUT-02 out-of-range answer is rejected by scoring
+PASS: TC-INPUT-01 / TC-INT-01 valid choices complete a session after invalid-input retries
+PASS: TC-INPUT-03 malformed and out-of-range inputs produce feedback
+PASS: TC-QUIZ-01 prompt options are displayed with one-based numbering
+PASS: TC-QUIZ-03 and TC-SEC-04 answer key is not revealed before submission
+PASS: TC-QUIZ-02 session presents every question once in sequence
+PASS: TC-REL-01 incomplete input ends safely
+PASS: TC-INT-02 complete flow: load, quiz, score, and results
+PASS: TC-INPUT-02 answers below the range are rejected and the question is repeated
+PASS: TC-INPUT-03 empty, decimal, and trailing-text answers are rejected before the question advances
+PASS: TC-INPUT-03 repeated invalid answers keep the same question active
+PASS: TC-REL-01 end-of-file at the first answer prompt reports the documented error
+PASS: TC-QUIZ-02 every question is presented exactly once in order
+PASS: TC-RESULT-01 perfect result summary shows 100 percent and no incorrect answers
+PASS: TC-RESULT-04 zero-score boundary shows 0 percent and all incorrect answers
+PASS: TC-SCORE-04 percentage is rounded to one decimal place
+PASS: TC-SCORE-04 percentage is rounded to one decimal place
+PASS: TC-RESULT-05 inconsistent score totals are rejected
+PASS: TC-SCORE-06 mixed-answer summary reports consistent correct, incorrect, total, and percentage values
